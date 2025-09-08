@@ -11,18 +11,10 @@ export const NAV_DATA = [
         url: "/",
       },
       {
-        title: "Forms",
-        icon: Icons.Alphabet,
-        items: [
-          {
-            title: "Form Elements",
-            url: "/forms/form-elements",
-          },
-          {
-            title: "Form Layout",
-            url: "/forms/form-layout",
-          },
-        ],
+        title: "Products",
+        icon: Icons.FourCircle,
+        items: [],
+        url: "/products",
       },
       {
         title: "Tables",
