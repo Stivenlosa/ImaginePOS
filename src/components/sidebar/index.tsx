@@ -9,18 +9,20 @@ import {NAV_DATA} from "./data";
 import {ArrowLeftIcon, ChevronUp, HamburgerMenu} from "./icons";
 import {MenuItem} from "./menu-item";
 import {useSidebarContext} from "./sidebar-context";
+import {useTranslation} from "@/i18n";
 
 export function Sidebar() {
     const pathname = usePathname();
     const {setIsOpen, isOpen, isMobile, toggleSidebar} = useSidebarContext();
     const [expandedItems, setExpandedItems] = useState<string[]>([]);
+    const {t} = useTranslation();
 
-    const toggleExpanded = (title: string) => {
-        setExpandedItems((prev) => (prev.includes(title) ? [] : [title]));
+    const toggleExpanded = (titleKey: string) => {
+        setExpandedItems((prev) => (prev.includes(titleKey) ? [] : [titleKey]));
 
         // Uncomment the following line to enable multiple expanded items
         // setExpandedItems((prev) =>
-        //   prev.includes(title) ? prev.filter((t) => t !== title) : [...prev, title],
+        //   prev.includes(titleKey) ? prev.filter((t) => t !== titleKey) : [...prev, titleKey],
         // );
     };
 
@@ -30,8 +32,8 @@ export function Sidebar() {
             return section.items.some((item) => {
                 return item.items.some((subItem) => {
                     if (subItem.url === pathname) {
-                        if (!expandedItems.includes(item.title)) {
-                            toggleExpanded(item.title);
+                        if (!expandedItems.includes(item.titleKey)) {
+                            toggleExpanded(item.titleKey);
                         }
 
                         // Break the loop
@@ -54,7 +56,7 @@ export function Sidebar() {
             )}
 
 
-            {/* Toggle Button (always visible) */}
+                        {/* Toggle Button (always visible) */}
 
                 <button
                     onClick={toggleSidebar}
@@ -65,7 +67,7 @@ export function Sidebar() {
                     )}
                 >
                     <span className="sr-only">
-                       "Open Menu"
+                       {t("navigation.openMenu")}
                     </span>
                     <HamburgerMenu className="size-5"/>
                 </button>
@@ -96,7 +98,7 @@ export function Sidebar() {
                                 onClick={toggleSidebar}
                                 className="absolute left-3/4 right-4.5 top-1/2 -translate-y-1/2 text-right"
                             >
-                                <span className="sr-only">Close Menu</span>
+                                <span className="sr-only">{t("navigation.closeMenu")}</span>
 
                                 <ArrowLeftIcon className="ml-auto size-7"/>
                             </button>
@@ -107,53 +109,53 @@ export function Sidebar() {
                     {/* Navigation */}
                     <div className="custom-scrollbar mt-6 flex-1 overflow-y-auto pr-3 min-[850px]:mt-10">
                         {NAV_DATA.map((section) => (
-                            <div key={section.label} className="mb-6">
+                            <div key={section.labelKey} className="mb-6">
                                 <h2 className="mb-5 text-sm font-medium text-dark-4 dark:text-dark-6">
-                                    {section.label}
+                                    {t(section.labelKey)}
                                 </h2>
 
-                                <nav role="navigation" aria-label={section.label}>
+                                <nav role="navigation" aria-label={t(section.labelKey)}>
                                     <ul className="space-y-2">
                                         {section.items.map((item) => (
-                                            <li key={item.title}>
+                                            <li key={item.titleKey}>
                                                 {item.items.length ? (
                                                     <div>
                                                         <MenuItem
                                                             isActive={item.items.some(
                                                                 ({url}) => url === pathname,
                                                             )}
-                                                            onClick={() => toggleExpanded(item.title)}
+                                                            onClick={() => toggleExpanded(item.titleKey)}
                                                         >
                                                             <item.icon
                                                                 className="size-6 shrink-0"
                                                                 aria-hidden="true"
                                                             />
 
-                                                            <span>{item.title}</span>
+                                                            <span>{t(item.titleKey)}</span>
 
                                                             <ChevronUp
                                                                 className={cn(
                                                                     "ml-auto rotate-180 transition-transform duration-200",
-                                                                    expandedItems.includes(item.title) &&
+                                                                    expandedItems.includes(item.titleKey) &&
                                                                     "rotate-0",
                                                                 )}
                                                                 aria-hidden="true"
                                                             />
                                                         </MenuItem>
 
-                                                        {expandedItems.includes(item.title) && (
+                                                        {expandedItems.includes(item.titleKey) && (
                                                             <ul
                                                                 className="ml-9 mr-0 space-y-1.5 pb-[15px] pr-0 pt-2"
                                                                 role="menu"
                                                             >
                                                                 {item.items.map((subItem) => (
-                                                                    <li key={subItem.title} role="none">
+                                                                    <li key={subItem.titleKey} role="none">
                                                                         <MenuItem
                                                                             as="link"
                                                                             href={subItem.url}
                                                                             isActive={pathname === subItem.url}
                                                                         >
-                                                                            <span>{subItem.title}</span>
+                                                                            <span>{t(subItem.titleKey)}</span>
                                                                         </MenuItem>
                                                                     </li>
                                                                 ))}
@@ -166,7 +168,7 @@ export function Sidebar() {
                                                             "url" in item
                                                                 ? item.url + ""
                                                                 : "/" +
-                                                                item.title.toLowerCase().split(" ").join("-");
+                                                                t(item.titleKey).toLowerCase().split(" ").join("-");
 
                                                         return (
                                                             <MenuItem
@@ -180,7 +182,7 @@ export function Sidebar() {
                                                                     aria-hidden="true"
                                                                 />
 
-                                                                <span>{item.title}</span>
+                                                                <span>{t(item.titleKey)}</span>
                                                             </MenuItem>
                                                         );
                                                     })()

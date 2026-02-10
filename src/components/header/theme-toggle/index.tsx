@@ -2,6 +2,7 @@ import { cn } from "@/lib/utils";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { Moon, Sun } from "./icons";
+import { useTranslation } from "@/i18n";
 
 const THEMES = [
   {
@@ -17,6 +18,7 @@ const THEMES = [
 export function ThemeToggleSwitch() {
   const { setTheme, theme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     setMounted(true);
@@ -32,7 +34,7 @@ export function ThemeToggleSwitch() {
       className="group rounded-full bg-gray-3 p-[5px] text-[#111928] outline-1 outline-primary focus-visible:outline dark:bg-[#020D1A] dark:text-current"
     >
       <span className="sr-only">
-        Switch to {theme === "light" ? "dark" : "light"} mode
+        {theme === "light" ? t("theme.switchToDark") : t("theme.switchToLight")}
       </span>
 
       <span aria-hidden className="relative flex gap-2.5">

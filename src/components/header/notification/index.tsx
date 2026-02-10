@@ -7,36 +7,38 @@ import {
 } from "@/components/ui/dropdown";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/i18n";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { BellIcon } from "./icons";
 
+// Notification data using translation keys
 const notificationList = [
   {
     image: "/images/user/user-15.png",
-    title: "Piter Joined the Team!",
-    subTitle: "Congratulate him",
+    titleKey: "notifications.piterJoined",
+    subTitleKey: "notifications.congratulateHim",
   },
   {
     image: "/images/user/user-03.png",
-    title: "New message",
-    subTitle: "Devid sent a new message",
+    titleKey: "notifications.newMessage",
+    subTitleKey: "notifications.devidSent",
   },
   {
     image: "/images/user/user-26.png",
-    title: "New Payment received",
-    subTitle: "Check your earnings",
+    titleKey: "notifications.newPayment",
+    subTitleKey: "notifications.checkEarnings",
   },
   {
     image: "/images/user/user-28.png",
-    title: "Jolly completed tasks",
-    subTitle: "Assign new task",
+    titleKey: "notifications.jollyCompleted",
+    subTitleKey: "notifications.assignTask",
   },
   {
     image: "/images/user/user-27.png",
-    title: "Roman Joined the Team!",
-    subTitle: "Congratulate him",
+    titleKey: "notifications.romanJoined",
+    subTitleKey: "notifications.congratulateHim",
   },
 ];
 
@@ -44,6 +46,7 @@ export function Notification() {
   const [isOpen, setIsOpen] = useState(false);
   const [isDotVisible, setIsDotVisible] = useState(true);
   const isMobile = useIsMobile();
+  const { t } = useTranslation();
 
   return (
     <Dropdown
@@ -56,7 +59,7 @@ export function Notification() {
     >
       <DropdownTrigger
         className="grid size-12 place-items-center rounded-full border bg-gray-2 text-dark outline-none hover:text-primary focus-visible:border-primary focus-visible:text-primary dark:border-dark-4 dark:bg-dark-3 dark:text-white dark:focus-visible:border-primary"
-        aria-label="View Notifications"
+        aria-label={t("notifications.title")}
       >
         <span className="relative">
           <BellIcon />
@@ -79,10 +82,10 @@ export function Notification() {
       >
         <div className="mb-1 flex items-center justify-between px-2 py-1.5">
           <span className="text-lg font-medium text-dark dark:text-white">
-            Notifications
+            {t("notifications.title")}
           </span>
           <span className="rounded-md bg-primary px-[9px] py-0.5 text-xs font-medium text-white">
-            5 new
+            {t("notifications.new", { count: 5 })}
           </span>
         </div>
 
@@ -104,11 +107,11 @@ export function Notification() {
 
                 <div>
                   <strong className="block text-sm font-medium text-dark dark:text-white">
-                    {item.title}
+                    {t(item.titleKey)}
                   </strong>
 
                   <span className="truncate text-sm font-medium text-dark-5 dark:text-dark-6">
-                    {item.subTitle}
+                    {t(item.subTitleKey)}
                   </span>
                 </div>
               </Link>
@@ -121,7 +124,7 @@ export function Notification() {
           onClick={() => setIsOpen(false)}
           className="block rounded-lg border border-primary p-2 text-center text-sm font-medium tracking-wide text-primary outline-none transition-colors hover:bg-blue-light-5 focus:bg-blue-light-5 focus:text-primary focus-visible:border-primary dark:border-dark-3 dark:text-dark-6 dark:hover:border-dark-5 dark:hover:bg-dark-3 dark:hover:text-dark-7 dark:focus-visible:border-dark-5 dark:focus-visible:bg-dark-3 dark:focus-visible:text-dark-7"
         >
-          See all notifications
+          {t("notifications.seeAll")}
         </Link>
       </DropdownContent>
     </Dropdown>

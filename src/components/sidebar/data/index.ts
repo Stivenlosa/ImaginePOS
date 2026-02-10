@@ -1,38 +1,40 @@
 import * as Icons from "../icons";
 
+// Navigation data using translation keys
+// Labels and titles use i18n keys that will be translated in the sidebar component
 export const NAV_DATA = [
   {
-    label: "MAIN MENU",
+    labelKey: "navigation.mainMenu",
     items: [
       {
-        title: "Sales",
+        titleKey: "navigation.sales",
         icon: Icons.CurrentCartIcon,
         items: [],
         url: "/",
       },
       {
-        title: "Products",
+        titleKey: "navigation.products",
         icon: Icons.FourCircle,
         items: [],
         url: "/products",
       },
       {
-        title: "Tables",
+        titleKey: "navigation.tables",
         url: "/tables",
         icon: Icons.Table,
         items: [
           {
-            title: "Tables",
+            titleKey: "navigation.tables",
             url: "/tables",
           },
         ],
       },
       {
-        title: "Pages",
+        titleKey: "navigation.pages",
         icon: Icons.Alphabet,
         items: [
           {
-            title: "Settings",
+            titleKey: "navigation.settings",
             url: "/pages/settings",
           },
         ],
@@ -40,38 +42,38 @@ export const NAV_DATA = [
     ],
   },
   {
-    label: "OTHERS",
+    labelKey: "navigation.others",
     items: [
       {
-        title: "Charts",
+        titleKey: "navigation.charts",
         icon: Icons.PieChart,
         items: [
           {
-            title: "Basic Chart",
+            titleKey: "navigation.basicChart",
             url: "/charts/basic-chart",
           },
         ],
       },
       {
-        title: "UI Elements",
+        titleKey: "navigation.uiElements",
         icon: Icons.FourCircle,
         items: [
           {
-            title: "Alerts",
+            titleKey: "navigation.alerts",
             url: "/ui-elements/alerts",
           },
           {
-            title: "Buttons",
+            titleKey: "navigation.buttons",
             url: "/ui-elements/buttons",
           },
         ],
       },
       {
-        title: "Authentication",
+        titleKey: "navigation.authentication",
         icon: Icons.Authentication,
         items: [
           {
-            title: "Sign In",
+            titleKey: "navigation.signIn",
             url: "/auth/sign-in",
           },
         ],

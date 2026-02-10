@@ -1,0 +1,123 @@
+{
+    "common": {
+        "search": "Search",
+        "total": "Total",
+        "clear": "Clear",
+        "checkout": "Checkout",
+        "addToCart": "Add to Cart",
+        "cancel": "Cancel",
+        "save": "Save",
+        "saving": "Saving...",
+        "add": "Add",
+        "adding": "Adding...",
+        "edit": "Edit",
+        "delete": "Delete",
+        "close": "Close",
+        "loading": "Loading...",
+        "error": "Error",
+        "success": "Success",
+        "confirm": "Confirm",
+        "preview": "Preview"
+    },
+    "userInfo": {
+        "myAccount": "My Account",
+        "userInformation": "User information",
+        "viewProfile": "View profile",
+        "accountSettings": "Account Settings",
+        "logOut": "Log out",
+        "language": "Language",
+        "selectLanguage": "Select Language"
+    },
+    "cart": {
+        "title": "Cart",
+        "empty": "Cart is empty",
+        "scaleWeight": "Scale Weight",
+        "connected": "Connected",
+        "disconnected": "Disconnected",
+        "manualWeight": "Manual weight",
+        "read": "Read",
+        "weighing": "Weighing",
+        "remove": "Remove"
+    },
+    "checkout": {
+        "receipt": "Receipt",
+        "orderNumber": "Order #{{number}}",
+        "date": "Date",
+        "items": "Items",
+        "subtotal": "Subtotal",
+        "tax": "Tax",
+        "total": "Total",
+        "print": "Print Receipt",
+        "newSale": "New Sale",
+        "thankYou": "Thank you for your purchase!",
+        "emptyCartError": "Cannot checkout with an empty cart",
+        "orderComplete": "Order Complete",
+        "selectPaymentType": "Select Payment Type",
+        "confirmPayment": "Confirm Payment",
+        "paymentMethod": "Payment Method",
+        "processing": "Processing..."
+    },
+    "paymentTypes": {
+        "cash": "Cash",
+        "card": "Card",
+        "transfer": "Transfer"
+    },
+    "products": {
+        "title": "Products",
+        "editProduct": "Edit Product",
+        "productName": "Product Name",
+        "price": "Price",
+        "saleUnit": "Sale Unit",
+        "noProducts": "No products available"
+    },
+    "saleUnits": {
+        "unit": "Unit",
+        "kg": "Kilogram",
+        "lb": "Pound",
+        "oz": "Ounce",
+        "g": "Gram",
+        "liter": "Liter",
+        "ml": "Milliliter"
+    },
+    "navigation": {
+        "mainMenu": "MAIN MENU",
+        "others": "OTHERS",
+        "sales": "Sales",
+        "products": "Products",
+        "tables": "Tables",
+        "pages": "Pages",
+        "settings": "Settings",
+        "charts": "Charts",
+        "basicChart": "Basic Chart",
+        "uiElements": "UI Elements",
+        "alerts": "Alerts",
+        "buttons": "Buttons",
+        "authentication": "Authentication",
+        "signIn": "Sign In",
+        "openMenu": "Open Menu",
+        "closeMenu": "Close Menu"
+    },
+    "header": {
+        "posSystem": "POS SYSTEM",
+        "subtitle": "Next.js pos system solution",
+        "toggleSidebar": "Toggle Sidebar"
+    },
+    "notifications": {
+        "title": "Notifications",
+        "new": "{{count}} new",
+        "seeAll": "See all notifications",
+        "piterJoined": "Piter Joined the Team!",
+        "congratulateHim": "Congratulate him",
+        "newMessage": "New message",
+        "devidSent": "Devid sent a new message",
+        "newPayment": "New Payment received",
+        "checkEarnings": "Check your earnings",
+        "jollyCompleted": "Jolly completed tasks",
+        "assignTask": "Assign new task",
+        "romanJoined": "Roman Joined the Team!"
+    },
+    "theme": {
+        "switchToDark": "Switch to dark mode",
+        "switchToLight": "Switch to light mode"
+    }
+}

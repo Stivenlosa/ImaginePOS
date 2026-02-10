@@ -1,0 +1,123 @@
+{
+    "common": {
+        "search": "Buscar",
+        "total": "Total",
+        "clear": "Limpiar",
+        "checkout": "Pagar",
+        "addToCart": "Agregar al Carrito",
+        "cancel": "Cancelar",
+        "save": "Guardar",
+        "saving": "Guardando...",
+        "add": "Agregar",
+        "adding": "Agregando...",
+        "edit": "Editar",
+        "delete": "Eliminar",
+        "close": "Cerrar",
+        "loading": "Cargando...",
+        "error": "Error",
+        "success": "Éxito",
+        "confirm": "Confirmar",
+        "preview": "Vista previa"
+    },
+    "userInfo": {
+        "myAccount": "Mi Cuenta",
+        "userInformation": "Información del usuario",
+        "viewProfile": "Ver perfil",
+        "accountSettings": "Configuración de Cuenta",
+        "logOut": "Cerrar sesión",
+        "language": "Idioma",
+        "selectLanguage": "Seleccionar Idioma"
+    },
+    "cart": {
+        "title": "Carrito",
+        "empty": "El carrito está vacío",
+        "scaleWeight": "Peso de Báscula",
+        "connected": "Conectada",
+        "disconnected": "Desconectada",
+        "manualWeight": "Peso manual",
+        "read": "Leer",
+        "weighing": "Pesando",
+        "remove": "Quitar"
+    },
+    "checkout": {
+        "receipt": "Recibo",
+        "orderNumber": "Orden #{{number}}",
+        "date": "Fecha",
+        "items": "Artículos",
+        "subtotal": "Subtotal",
+        "tax": "Impuesto",
+        "total": "Total",
+        "print": "Imprimir Recibo",
+        "newSale": "Nueva Venta",
+        "thankYou": "¡Gracias por su compra!",
+        "emptyCartError": "No se puede pagar con un carrito vacío",
+        "orderComplete": "Orden Completada",
+        "selectPaymentType": "Seleccionar Tipo de Pago",
+        "confirmPayment": "Confirmar Pago",
+        "paymentMethod": "Método de Pago",
+        "processing": "Procesando..."
+    },
+    "paymentTypes": {
+        "cash": "Efectivo",
+        "card": "Tarjeta",
+        "transfer": "Transferencia"
+    },
+    "products": {
+        "title": "Productos",
+        "editProduct": "Editar Producto",
+        "productName": "Nombre del Producto",
+        "price": "Precio",
+        "saleUnit": "Unidad de Venta",
+        "noProducts": "No hay productos disponibles"
+    },
+    "saleUnits": {
+        "unit": "Unidad",
+        "kg": "Kilogramo",
+        "lb": "Libra",
+        "oz": "Onza",
+        "g": "Gramo",
+        "liter": "Litro",
+        "ml": "Mililitro"
+    },
+    "navigation": {
+        "mainMenu": "MENÚ PRINCIPAL",
+        "others": "OTROS",
+        "sales": "Ventas",
+        "products": "Productos",
+        "tables": "Tablas",
+        "pages": "Páginas",
+        "settings": "Configuración",
+        "charts": "Gráficos",
+        "basicChart": "Gráfico Básico",
+        "uiElements": "Elementos UI",
+        "alerts": "Alertas",
+        "buttons": "Botones",
+        "authentication": "Autenticación",
+        "signIn": "Iniciar Sesión",
+        "openMenu": "Abrir Menú",
+        "closeMenu": "Cerrar Menú"
+    },
+    "header": {
+        "posSystem": "SISTEMA POS",
+        "subtitle": "Solución de sistema POS con Next.js",
+        "toggleSidebar": "Alternar Barra Lateral"
+    },
+    "notifications": {
+        "title": "Notificaciones",
+        "new": "{{count}} nuevas",
+        "seeAll": "Ver todas las notificaciones",
+        "piterJoined": "¡Piter se unió al equipo!",
+        "congratulateHim": "Felicítalo",
+        "newMessage": "Nuevo mensaje",
+        "devidSent": "Devid envió un nuevo mensaje",
+        "newPayment": "Nuevo pago recibido",
+        "checkEarnings": "Revisa tus ganancias",
+        "jollyCompleted": "Jolly completó las tareas",
+        "assignTask": "Asignar nueva tarea",
+        "romanJoined": "¡Roman se unió al equipo!"
+    },
+    "theme": {
+        "switchToDark": "Cambiar a modo oscuro",
+        "switchToLight": "Cambiar a modo claro"
+    }
+}
