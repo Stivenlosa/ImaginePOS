@@ -57,6 +57,29 @@
         "paymentMethod": "Método de Pago",
         "processing": "Procesando..."
     },
+    "purchases": {
+        "order": "Orden",
+        "date": "Fecha",
+        "paymentType": "Tipo de Pago",
+        "total": "Total",
+        "actions": "Acciones",
+        "viewDetails": "Ver Detalles",
+        "printReceipt": "Imprimir Recibo",
+        "noPurchases": "No hay compras aún",
+        "item": "artículo",
+        "items": "artículos",
+        "orderNumber": "Orden #{{number}}"
+    },
+    "weeklyProfit": {
+        "title": "Ventas Semanales",
+        "clickDay": "Haz clic en una barra para ver el resumen del día",
+        "daySummary": "Resumen del Día",
+        "paymentSummary": "Resumen de Pagos",
+        "purchases": "Compras",
+        "noPurchasesDay": "No hay compras en este día",
+        "printSummary": "Imprimir Resumen",
+        "generatedAt": "Generado el"
+    },
     "paymentTypes": {
         "cash": "Efectivo",
         "card": "Tarjeta",
@@ -83,6 +106,8 @@
         "mainMenu": "MENÚ PRINCIPAL",
         "others": "OTROS",
         "sales": "Ventas",
+        "purchases": "Compras",
+        "reports": "Reportes",
         "products": "Productos",
         "tables": "Tablas",
         "pages": "Páginas",

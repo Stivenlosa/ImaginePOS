@@ -7,7 +7,6 @@ import dynamic from "next/dynamic";
 type PropsType = {
   data: {
     received: { x: unknown; y: number }[];
-    due: { x: unknown; y: number }[];
   };
 };
 
@@ -22,7 +21,7 @@ export function PaymentsOverviewChart({ data }: PropsType) {
     legend: {
       show: false,
     },
-    colors: ["#10B981", "#0ABEF9"],
+    colors: ["#10B981"],
     chart: {
       height: 310,
       type: "area",
@@ -74,6 +73,9 @@ export function PaymentsOverviewChart({ data }: PropsType) {
       marker: {
         show: true,
       },
+      y: {
+        formatter: (val: number) => `$${val.toFixed(2)}`,
+      },
     },
     xaxis: {
       axisBorder: {
@@ -81,6 +83,11 @@ export function PaymentsOverviewChart({ data }: PropsType) {
       },
       axisTicks: {
         show: false,
+      },
+    },
+    yaxis: {
+      labels: {
+        formatter: (val: number) => `$${val.toFixed(0)}`,
       },
     },
   };
@@ -93,10 +100,6 @@ export function PaymentsOverviewChart({ data }: PropsType) {
           {
             name: "Received",
             data: data.received,
-          },
-          {
-            name: "Due",
-            data: data.due,
           },
         ]}
         type="area"

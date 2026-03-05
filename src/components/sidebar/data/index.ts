@@ -19,15 +19,10 @@ export const NAV_DATA = [
         url: "/products",
       },
       {
-        titleKey: "navigation.tables",
-        url: "/tables",
-        icon: Icons.Table,
-        items: [
-          {
-            titleKey: "navigation.tables",
-            url: "/tables",
-          },
-        ],
+        titleKey: "navigation.reports",
+        icon: Icons.PieChart,
+        items: [],
+        url: "/reports",
       },
       {
         titleKey: "navigation.pages",
@@ -44,30 +39,6 @@ export const NAV_DATA = [
   {
     labelKey: "navigation.others",
     items: [
-      {
-        titleKey: "navigation.charts",
-        icon: Icons.PieChart,
-        items: [
-          {
-            titleKey: "navigation.basicChart",
-            url: "/charts/basic-chart",
-          },
-        ],
-      },
-      {
-        titleKey: "navigation.uiElements",
-        icon: Icons.FourCircle,
-        items: [
-          {
-            titleKey: "navigation.alerts",
-            url: "/ui-elements/alerts",
-          },
-          {
-            titleKey: "navigation.buttons",
-            url: "/ui-elements/buttons",
-          },
-        ],
-      },
       {
         titleKey: "navigation.authentication",
         icon: Icons.Authentication,

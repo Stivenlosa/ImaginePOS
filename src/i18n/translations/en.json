@@ -57,6 +57,29 @@
         "paymentMethod": "Payment Method",
         "processing": "Processing..."
     },
+    "purchases": {
+        "order": "Order",
+        "date": "Date",
+        "paymentType": "Payment Type",
+        "total": "Total",
+        "actions": "Actions",
+        "viewDetails": "View Details",
+        "printReceipt": "Print Receipt",
+        "noPurchases": "No purchases yet",
+        "item": "item",
+        "items": "items",
+        "orderNumber": "Order #{{number}}"
+    },
+    "weeklyProfit": {
+        "title": "Weekly Sales",
+        "clickDay": "Click on a day bar to see the day's summary",
+        "daySummary": "Day Summary",
+        "paymentSummary": "Payment Summary",
+        "purchases": "Purchases",
+        "noPurchasesDay": "No purchases on this day",
+        "printSummary": "Print Summary",
+        "generatedAt": "Generated at"
+    },
     "paymentTypes": {
         "cash": "Cash",
         "card": "Card",
@@ -83,6 +106,8 @@
         "mainMenu": "MAIN MENU",
         "others": "OTHERS",
         "sales": "Sales",
+        "purchases": "Purchases",
+        "reports": "Reports",
         "products": "Products",
         "tables": "Tables",
         "pages": "Pages",

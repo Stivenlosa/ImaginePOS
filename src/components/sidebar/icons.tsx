@@ -204,6 +204,25 @@ export function ArrowLeftIcon(props: PropsType) {
   );
 }
 
+export function PurchasesIcon(props: PropsType) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={24}
+      height={24}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      {...props}
+    >
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M3.04 2.292a.75.75 0 01.958.46l.632 1.998h14.98a1.75 1.75 0 011.695 2.182l-1.635 6.545A3.75 3.75 0 0116.03 16.25H8.97a3.75 3.75 0 01-3.64-2.773L3.502 6.473l-.92-2.903a.75.75 0 01.46-.958zm1.787 3.958l1.615 6.452A2.25 2.25 0 008.97 14.75h7.06a2.25 2.25 0 002.183-1.692l1.636-6.546a.25.25 0 00-.242-.312H5.392l-.564-1.95zm3.173 15a1.75 1.75 0 113.5 0 1.75 1.75 0 01-3.5 0zm1.75-.25a.25.25 0 100 .5.25.25 0 000-.5zm5.5.25a1.75 1.75 0 113.5 0 1.75 1.75 0 01-3.5 0zm1.75-.25a.25.25 0 100 .5.25.25 0 000-.5z"
+      />
+    </svg>
+  );
+}
+
 export function HamburgerMenu(props: PropsType) {
     return (
         <svg

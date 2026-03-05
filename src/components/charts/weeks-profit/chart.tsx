@@ -5,18 +5,21 @@ import dynamic from "next/dynamic";
 
 type PropsType = {
   data: {
-    sales: { x: string; y: number }[];
-    revenue: { x: string; y: number }[];
+    cash: { x: string; y: number }[];
+    card: { x: string; y: number }[];
+    transfer: { x: string; y: number }[];
   };
+  onDayClick?: (dayIndex: number) => void;
+  seriesLabels: { cash: string; card: string; transfer: string };
 };
 
 const Chart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
 });
 
-export function WeeksProfitChart({ data }: PropsType) {
+export function WeeksProfitChart({ data, onDayClick, seriesLabels }: PropsType) {
   const options: ApexOptions = {
-    colors: ["#10B981", "#0ABEF9"],
+    colors: ["#219653", "#3C50E0", "#F59E0B"],
     chart: {
       type: "bar",
       stacked: true,
@@ -25,6 +28,13 @@ export function WeeksProfitChart({ data }: PropsType) {
       },
       zoom: {
         enabled: false,
+      },
+      events: {
+        dataPointSelection: (_event, _chartContext, config) => {
+          if (onDayClick && config.dataPointIndex !== undefined) {
+            onDayClick(config.dataPointIndex);
+          }
+        },
       },
     },
 
@@ -76,6 +86,11 @@ export function WeeksProfitChart({ data }: PropsType) {
         show: false,
       },
     },
+    yaxis: {
+      labels: {
+        formatter: (val: number) => `$${val.toFixed(0)}`,
+      },
+    },
     legend: {
       position: "top",
       horizontalAlign: "left",
@@ -87,22 +102,32 @@ export function WeeksProfitChart({ data }: PropsType) {
         shape: "circle",
       },
     },
+    tooltip: {
+      y: {
+        formatter: (val: number) => `$${val.toFixed(2)}`,
+      },
+    },
     fill: {
       opacity: 1,
     },
   };
+
   return (
     <div className="-ml-3.5 mt-3">
       <Chart
         options={options}
         series={[
           {
-            name: "Sales",
-            data: data.sales,
+            name: seriesLabels.cash,
+            data: data.cash,
           },
           {
-            name: "Revenue",
-            data: data.revenue,
+            name: seriesLabels.card,
+            data: data.card,
+          },
+          {
+            name: seriesLabels.transfer,
+            data: data.transfer,
           },
         ]}
         type="bar"

@@ -8,24 +8,37 @@ const globalForPrisma = globalThis as unknown as {
     pool: Pool | undefined;
 };
 
-function createPrismaClient() {
-    const databaseUrl = process.env.DATABASE_URL;
-    
-    if (!databaseUrl) {
-        throw new Error("DATABASE_URL environment variable is not set");
+function getPool() {
+    if (!globalForPrisma.pool) {
+        const databaseUrl = process.env.DATABASE_URL;
+        
+        if (!databaseUrl) {
+            throw new Error("DATABASE_URL environment variable is not set");
+        }
+
+        globalForPrisma.pool = new Pool({
+            connectionString: databaseUrl,
+            max: 5,
+            idleTimeoutMillis: 60000,
+            connectionTimeoutMillis: 10000,
+            allowExitOnIdle: true,
+        });
+
+        // Handle unexpected pool errors so they don't crash the process
+        globalForPrisma.pool.on("error", (err) => {
+            console.error("Unexpected pool error:", err);
+            // Reset pool and prisma so they get recreated on next use
+            globalForPrisma.pool = undefined;
+            globalForPrisma.prisma = undefined;
+        });
     }
 
-    // Create PostgreSQL connection pool
-    const pool = new Pool({
-        connectionString: databaseUrl,
-        max: 10,
-        idleTimeoutMillis: 30000,
-    });
+    return globalForPrisma.pool;
+}
 
-    // Create Prisma adapter
+function createPrismaClient() {
+    const pool = getPool();
     const adapter = new PrismaPg(pool);
-
-    // Create Prisma client with adapter
     return new PrismaClient({ adapter });
 }
 

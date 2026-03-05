@@ -1,3 +1,5 @@
+import { prisma } from "@/db";
+
 export async function getDevicesUsedData(
   timeFrame?: "monthly" | "yearly" | (string & {}),
 ) {
@@ -37,109 +39,136 @@ export async function getDevicesUsedData(
   return data;
 }
 
-export async function getPaymentsOverviewData(
-  timeFrame?: "monthly" | "yearly" | (string & {}),
-) {
-  // Fake delay
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+export async function getPaymentsOverviewData() {
+  const now = new Date();
+  const currentYear = now.getFullYear();
 
-  if (timeFrame === "yearly") {
-    return {
-      received: [
-        { x: 2020, y: 450 },
-        { x: 2021, y: 620 },
-        { x: 2022, y: 780 },
-        { x: 2023, y: 920 },
-        { x: 2024, y: 1080 },
-      ],
-      due: [
-        { x: 2020, y: 1480 },
-        { x: 2021, y: 1720 },
-        { x: 2022, y: 1950 },
-        { x: 2023, y: 2300 },
-        { x: 2024, y: 1200 },
-      ],
-    };
+  // Get all purchases for the current year
+  const startOfYear = new Date(currentYear, 0, 1);
+  const endOfYear = new Date(currentYear + 1, 0, 1);
+
+  const purchases = await prisma.purchase.findMany({
+    where: {
+      createdAt: {
+        gte: startOfYear,
+        lt: endOfYear,
+      },
+    },
+    select: {
+      total: true,
+      createdAt: true,
+    },
+    orderBy: { createdAt: "asc" },
+  });
+
+  // Aggregate totals by month
+  const monthNames = [
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+  ];
+
+  const monthlyTotals = new Array(12).fill(0);
+  for (const purchase of purchases) {
+    const month = purchase.createdAt.getMonth();
+    monthlyTotals[month] += purchase.total;
   }
 
-  return {
-    received: [
-      { x: "Jan", y: 0 },
-      { x: "Feb", y: 20 },
-      { x: "Mar", y: 35 },
-      { x: "Apr", y: 45 },
-      { x: "May", y: 35 },
-      { x: "Jun", y: 55 },
-      { x: "Jul", y: 65 },
-      { x: "Aug", y: 50 },
-      { x: "Sep", y: 65 },
-      { x: "Oct", y: 75 },
-      { x: "Nov", y: 60 },
-      { x: "Dec", y: 75 },
-    ],
-    due: [
-      { x: "Jan", y: 15 },
-      { x: "Feb", y: 9 },
-      { x: "Mar", y: 17 },
-      { x: "Apr", y: 32 },
-      { x: "May", y: 25 },
-      { x: "Jun", y: 68 },
-      { x: "Jul", y: 80 },
-      { x: "Aug", y: 68 },
-      { x: "Sep", y: 84 },
-      { x: "Oct", y: 94 },
-      { x: "Nov", y: 74 },
-      { x: "Dec", y: 62 },
-    ],
-  };
+  const received = monthNames.map((name, index) => ({
+    x: name,
+    y: Math.round(monthlyTotals[index] * 100) / 100,
+  }));
+
+  return { received };
 }
 
-export async function getWeeksProfitData(timeFrame?: string) {
-  // Fake delay
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+export async function getWeeksProfitData() {
+  const now = new Date();
+  // Get start of current week (Monday)
+  const dayOfWeek = now.getDay(); // 0=Sun, 1=Mon, ...
+  const diffToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - diffToMonday);
+  startOfWeek.setHours(0, 0, 0, 0);
 
-  if (timeFrame === "last week") {
-    return {
-      sales: [
-        { x: "Sat", y: 33 },
-        { x: "Sun", y: 44 },
-        { x: "Mon", y: 31 },
-        { x: "Tue", y: 57 },
-        { x: "Wed", y: 12 },
-        { x: "Thu", y: 33 },
-        { x: "Fri", y: 55 },
-      ],
-      revenue: [
-        { x: "Sat", y: 10 },
-        { x: "Sun", y: 20 },
-        { x: "Mon", y: 17 },
-        { x: "Tue", y: 7 },
-        { x: "Wed", y: 10 },
-        { x: "Thu", y: 23 },
-        { x: "Fri", y: 13 },
-      ],
-    };
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setDate(startOfWeek.getDate() + 7);
+
+  const purchases = await prisma.purchase.findMany({
+    where: {
+      createdAt: {
+        gte: startOfWeek,
+        lt: endOfWeek,
+      },
+    },
+    include: {
+      details: true,
+    },
+    orderBy: { createdAt: "asc" },
+  });
+
+  const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  const dayDates: string[] = [];
+
+  // Build date strings for each day of the week
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(startOfWeek);
+    d.setDate(startOfWeek.getDate() + i);
+    dayDates.push(d.toISOString().split("T")[0]); // YYYY-MM-DD
   }
 
+  // Aggregate totals by day and payment type
+  const cashByDay = new Array(7).fill(0);
+  const cardByDay = new Array(7).fill(0);
+  const transferByDay = new Array(7).fill(0);
+
+  // Group purchases by day for modal data
+  const purchasesByDay: Record<string, typeof purchases> = {};
+  for (const dayDate of dayDates) {
+    purchasesByDay[dayDate] = [];
+  }
+
+  for (const purchase of purchases) {
+    const purchaseDate = purchase.createdAt.toISOString().split("T")[0];
+    const dayIndex = dayDates.indexOf(purchaseDate);
+    if (dayIndex === -1) continue;
+
+    if (purchase.paymentType === "cash") {
+      cashByDay[dayIndex] += purchase.total;
+    } else if (purchase.paymentType === "card") {
+      cardByDay[dayIndex] += purchase.total;
+    } else if (purchase.paymentType === "transfer") {
+      transferByDay[dayIndex] += purchase.total;
+    }
+
+    if (purchasesByDay[purchaseDate]) {
+      purchasesByDay[purchaseDate].push(purchase);
+    }
+  }
+
+  const round = (n: number) => Math.round(n * 100) / 100;
+
   return {
-    sales: [
-      { x: "Sat", y: 44 },
-      { x: "Sun", y: 55 },
-      { x: "Mon", y: 41 },
-      { x: "Tue", y: 67 },
-      { x: "Wed", y: 22 },
-      { x: "Thu", y: 43 },
-      { x: "Fri", y: 65 },
-    ],
-    revenue: [
-      { x: "Sat", y: 13 },
-      { x: "Sun", y: 23 },
-      { x: "Mon", y: 20 },
-      { x: "Tue", y: 8 },
-      { x: "Wed", y: 13 },
-      { x: "Thu", y: 27 },
-      { x: "Fri", y: 15 },
-    ],
+    cash: dayNames.map((name, i) => ({ x: name, y: round(cashByDay[i]) })),
+    card: dayNames.map((name, i) => ({ x: name, y: round(cardByDay[i]) })),
+    transfer: dayNames.map((name, i) => ({ x: name, y: round(transferByDay[i]) })),
+    dayDates,
+    dayNames,
+    purchasesByDay: Object.fromEntries(
+      Object.entries(purchasesByDay).map(([date, pList]) => [
+        date,
+        pList.map((p) => ({
+          ...p,
+          createdAt: p.createdAt.toISOString(),
+          updatedAt: p.updatedAt.toISOString(),
+          details: p.details.map((d) => ({
+            ...d,
+            createdAt: d.createdAt.toISOString(),
+          })),
+        })),
+      ])
+    ),
+    weekStart: startOfWeek.toISOString(),
+    weekEnd: endOfWeek.toISOString(),
   };
 }
 
