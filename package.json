@@ -4,19 +4,15 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "npx prisma generate && next build --turbopack",
+    "build": "npx prisma contract emit && next build --turbopack",
     "start": "next start",
-    "db:push": "npx prisma db push",
     "db:seed": "npx tsx prisma/seed.ts",
-    "db:studio": "npx prisma studio",
-    "db:generate": "npx prisma generate"
-  },
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
+    "db:generate": "npx prisma contract emit",
+    "db:migrate": "npx prisma db migrate --advance-ref db",
+    "db:verify": "npx prisma db verify"
   },
   "dependencies": {
-    "@prisma/adapter-pg": "7.3.0",
-    "@prisma/client": "7.3.0",
+    "@prisma/orm-postgres": "8.0.0-rc.13",
     "apexcharts": "^4.5.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -27,11 +23,11 @@
     "next-themes": "^0.4.4",
     "nextjs-toploader": "^3.7.15",
     "pg": "^8.18.0",
-    "prisma": "7.3.0",
     "react": "19.0.0",
     "react-apexcharts": "^1.7.0",
     "react-dom": "19.0.0",
-    "tailwind-merge": "^2.6.0"
+    "tailwind-merge": "^2.6.0",
+    "temporal-polyfill": "^1.0.5"
   },
   "devDependencies": {
     "@types/node": "^22",
@@ -45,6 +41,7 @@
     "postcss": "^8.5.6",
     "prettier": "^3.4.2",
     "prettier-plugin-tailwindcss": "^0.6.11",
+    "prisma": "8.0.0-rc.19",
     "tailwindcss": "^3.4.17",
     "tsx": "^4.21.0",
     "typescript": "^5"

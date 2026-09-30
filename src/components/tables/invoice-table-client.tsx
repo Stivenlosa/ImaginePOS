@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import dayjs from "dayjs";
 import { PreviewIcon, PrinterIcon, CloseIcon } from "./icons";
 import { useTranslation } from "@/i18n";
-import type { PaymentType, SaleUnit } from "@/generated/prisma";
+import type { PaymentType, SaleUnit } from "@/types/product";
 
 // Types matching the Prisma schema
 type PurchaseDetail = {

@@ -1,0 +1,66 @@
+// use prisma-8
+
+native_enum SaleUnit {
+  unit  = "unit"
+  kg    = "kg"
+  lb    = "lb"
+  oz    = "oz"
+  g     = "g"
+  liter = "liter"
+  ml    = "ml"
+}
+
+native_enum PaymentType {
+  cash     = "cash"
+  card     = "card"
+  transfer = "transfer"
+}
+
+// Timestamps are timestamp(3) without time zone, holding UTC wall-clock values (Prisma 7 layout).
+model Product {
+  id        Int               @id(map: "products_pkey") @default(autoincrement())
+  name      String
+  price     Float
+  image     String?
+  saleUnit  pg.enum(SaleUnit) @default("unit")
+  createdAt Timestamp(3)      @default(now())
+  updatedAt Timestamp(3)
+
+  purchaseDetails PurchaseDetail[]
+
+  @@map("products")
+}
+
+model Purchase {
+  id          Int                  @id(map: "purchases_pkey") @default(autoincrement())
+  orderNumber String
+  subtotal    Float
+  tax         Float
+  total       Float
+  paymentType pg.enum(PaymentType)
+  createdAt   Timestamp(3)         @default(now())
+  updatedAt   Timestamp(3)
+
+  details PurchaseDetail[]
+
+  @@index([orderNumber], map: "purchases_orderNumber_key", unique: true)
+  @@map("purchases")
+}
+
+model PurchaseDetail {
+  id          Int               @id(map: "purchase_details_pkey") @default(autoincrement())
+  purchaseId  Int
+  productId   Int
+  productName String
+  price       Float
+  quantity    Int               @default(1)
+  weight      Float?
+  saleUnit    pg.enum(SaleUnit)
+  lineTotal   Float
+  createdAt   Timestamp(3)      @default(now())
+
+  purchase Purchase @relation(fields: [purchaseId], references: [id], onDelete: Cascade, onUpdate: Cascade, map: "purchase_details_purchaseId_fkey", index: false)
+  product  Product  @relation(fields: [productId], references: [id], onDelete: Restrict, onUpdate: Cascade, map: "purchase_details_productId_fkey", index: false)
+
+  @@map("purchase_details")
+}

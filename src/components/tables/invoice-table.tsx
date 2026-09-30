@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import { InvoiceTableClient } from "./invoice-table-client";
-import type { PaymentType, SaleUnit } from "@/generated/prisma";
+import { timestampToIso } from "@/prisma/dates";
+import type { PaymentType, SaleUnit } from "@/types/product";
 
 type PurchaseFromDB = {
   id: number;
@@ -9,8 +10,8 @@ type PurchaseFromDB = {
   tax: number;
   total: number;
   paymentType: PaymentType;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Temporal.PlainDateTime;
+  updatedAt: Temporal.PlainDateTime;
   details: {
     id: number;
     purchaseId: number;
@@ -21,7 +22,7 @@ type PurchaseFromDB = {
     weight: number | null;
     saleUnit: SaleUnit;
     lineTotal: number;
-    createdAt: Date;
+    createdAt: Temporal.PlainDateTime;
   }[];
 };
 
@@ -34,11 +35,11 @@ export function InvoiceTable({ className, purchases }: InvoiceTableProps) {
   // Serialize dates to strings for client component
   const serializedPurchases = purchases.map((p) => ({
     ...p,
-    createdAt: p.createdAt.toISOString(),
-    updatedAt: p.updatedAt.toISOString(),
+    createdAt: timestampToIso(p.createdAt),
+    updatedAt: timestampToIso(p.updatedAt),
     details: p.details.map((d) => ({
       ...d,
-      createdAt: d.createdAt.toISOString(),
+      createdAt: timestampToIso(d.createdAt),
     })),
   }));
 

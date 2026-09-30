@@ -1,5 +1,5 @@
 import * as logos from "@/assets/logos";
-import { prisma } from "@/db";
+import { db } from "@/prisma/db";
 
 export async function getTopProducts() {
   // Fake delay
@@ -42,12 +42,10 @@ export async function getTopProducts() {
 }
 
 export async function getInvoiceTableData() {
-  const purchases = await prisma.purchase.findMany({
-    include: {
-      details: true,
-    },
-    orderBy: { createdAt: "desc" },
-  });
+  const purchases = await db.orm.public.Purchase
+    .include("details")
+    .orderBy((purchase) => purchase.createdAt.desc())
+    .all();
 
   return purchases;
 }

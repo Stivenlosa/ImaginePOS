@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/db";
-import type { SaleUnit } from "@/generated/prisma";
+import { nowTimestamp } from "@/prisma/dates";
+import { db } from "@/prisma/db";
+import type { SaleUnit } from "@/types/product";
 
 type RouteParams = {
     params: Promise<{ id: string }>;
@@ -19,9 +20,7 @@ export async function GET(request: Request, { params }: RouteParams) {
             );
         }
 
-        const product = await prisma.product.findUnique({
-            where: { id: productId },
-        });
+        const product = await db.orm.public.Product.first({ id: productId });
 
         if (!product) {
             return NextResponse.json(
@@ -56,15 +55,15 @@ export async function PUT(request: Request, { params }: RouteParams) {
         const body = await request.json();
         const { name, price, image, saleUnit } = body;
 
-        const product = await prisma.product.update({
-            where: { id: productId },
-            data: {
+        const product = await db.orm.public.Product
+            .where({ id: productId })
+            .update({
                 ...(name && { name }),
                 ...(price !== undefined && { price: parseFloat(price) }),
                 ...(image !== undefined && { image }),
                 ...(saleUnit && { saleUnit: saleUnit as SaleUnit }),
-            },
-        });
+                updatedAt: nowTimestamp(),
+            });
 
         return NextResponse.json(product);
     } catch (error) {
@@ -89,9 +88,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
             );
         }
 
-        await prisma.product.delete({
-            where: { id: productId },
-        });
+        await db.orm.public.Product.where({ id: productId }).delete();
 
         return NextResponse.json({ message: "Product deleted successfully" });
     } catch (error) {

@@ -11,6 +11,10 @@ export const SALE_UNITS = {
 
 export type SaleUnit = keyof typeof SALE_UNITS;
 
+export const PAYMENT_TYPES = ["cash", "card", "transfer"] as const;
+
+export type PaymentType = (typeof PAYMENT_TYPES)[number];
+
 export type Product = {
     id: number;
     name: string;

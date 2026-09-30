@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { useTranslation } from "@/i18n";
 import { WeeksProfitChart } from "./chart";
 import dayjs from "dayjs";
-import type { PaymentType, SaleUnit } from "@/generated/prisma";
+import type { PaymentType, SaleUnit } from "@/types/product";
 
 type PurchaseDetail = {
   id: number;

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/db";
-import type { PaymentType, SaleUnit } from "@/generated/prisma";
+import { nowTimestamp } from "@/prisma/dates";
+import { db } from "@/prisma/db";
+import type { PaymentType, SaleUnit } from "@/types/product";
 
 type PurchaseDetailInput = {
     productId: number;
@@ -24,16 +25,10 @@ type CreatePurchaseInput = {
 // GET all purchases
 export async function GET() {
     try {
-        const purchases = await prisma.purchase.findMany({
-            include: {
-                details: {
-                    include: {
-                        product: true,
-                    },
-                },
-            },
-            orderBy: { createdAt: "desc" },
-        });
+        const purchases = await db.orm.public.Purchase
+            .include("details", (details) => details.include("product"))
+            .orderBy((purchase) => purchase.createdAt.desc())
+            .all();
 
         return NextResponse.json(purchases);
     } catch (error) {
@@ -68,33 +63,39 @@ export async function POST(request: Request) {
             );
         }
 
-        // Create purchase with details in a transaction
-        const purchase = await prisma.purchase.create({
-            data: {
+        const purchase = await db.transaction(async (tx) => {
+            const created = await tx.orm.public.Purchase.create({
                 orderNumber,
                 subtotal,
                 tax,
                 total,
                 paymentType,
-                details: {
-                    create: details.map((detail) => ({
-                        productId: detail.productId,
-                        productName: detail.productName,
-                        price: detail.price,
-                        quantity: detail.quantity,
-                        weight: detail.weight || null,
-                        saleUnit: detail.saleUnit,
-                        lineTotal: detail.lineTotal,
-                    })),
-                },
-            },
-            include: {
-                details: {
-                    include: {
-                        product: true,
-                    },
-                },
-            },
+                updatedAt: nowTimestamp(),
+            });
+
+            await tx.orm.public.PurchaseDetail.createAll(
+                details.map((detail) => ({
+                    purchaseId: created.id,
+                    productId: detail.productId,
+                    productName: detail.productName,
+                    price: detail.price,
+                    quantity: detail.quantity,
+                    weight: detail.weight || null,
+                    saleUnit: detail.saleUnit,
+                    lineTotal: detail.lineTotal,
+                })),
+            );
+
+            const full = await tx.orm.public.Purchase
+                .where({ id: created.id })
+                .include("details", (line) => line.include("product"))
+                .first();
+
+            if (!full) {
+                throw new Error("Purchase not found after create");
+            }
+
+            return full;
         });
 
         return NextResponse.json(purchase, { status: 201 });

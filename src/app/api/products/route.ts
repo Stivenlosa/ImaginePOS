@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/db";
-import type { SaleUnit } from "@/generated/prisma";
+import { nowTimestamp } from "@/prisma/dates";
+import { db } from "@/prisma/db";
+import type { SaleUnit } from "@/types/product";
 
 // GET all products
 export async function GET() {
     try {
-        const products = await prisma.product.findMany({
-            orderBy: { createdAt: "desc" },
-        });
+        const products = await db.orm.public.Product
+            .orderBy((product) => product.createdAt.desc())
+            .all();
 
         return NextResponse.json(products);
     } catch (error) {
@@ -32,13 +33,12 @@ export async function POST(request: Request) {
             );
         }
 
-        const product = await prisma.product.create({
-            data: {
-                name,
-                price: parseFloat(price),
-                image: image || null,
-                saleUnit: (saleUnit as SaleUnit) || "unit",
-            },
+        const product = await db.orm.public.Product.create({
+            name,
+            price: parseFloat(price),
+            image: image || null,
+            saleUnit: (saleUnit as SaleUnit) || "unit",
+            updatedAt: nowTimestamp(),
         });
 
         return NextResponse.json(product, { status: 201 });

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import ProductList from "@/components/product";
 import CartSummary from "@/components/cartSummary";
+import PaymentAnnouncer from "@/components/PaymentAnnouncer/PaymentAnnouncer";
 import { SearchIcon } from "@/assets/icons";
 import { UserInfo } from "@/components/header/user-info";
 import { useTranslation } from "@/i18n";
@@ -18,6 +19,7 @@ export default function Sell() {
     return (
         <div className="flex h-screen bg-gray-50 overflow-hidden">
             <main className="flex flex-1 p-6 gap-6 h-full overflow-hidden">
+                <PaymentAnnouncer />
                 {/* Left side with User + Search + ProductList */}
                 <div className="flex-1 flex flex-col gap-4 min-h-0 overflow-hidden">
                     {/* Top bar with User and Search */}

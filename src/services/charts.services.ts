@@ -1,4 +1,5 @@
-import { prisma } from "@/db";
+import { timestampFromDate, timestampToDate, timestampToIso } from "@/prisma/dates";
+import { db } from "@/prisma/db";
 
 export async function getDevicesUsedData(
   timeFrame?: "monthly" | "yearly" | (string & {}),
@@ -47,19 +48,12 @@ export async function getPaymentsOverviewData() {
   const startOfYear = new Date(currentYear, 0, 1);
   const endOfYear = new Date(currentYear + 1, 0, 1);
 
-  const purchases = await prisma.purchase.findMany({
-    where: {
-      createdAt: {
-        gte: startOfYear,
-        lt: endOfYear,
-      },
-    },
-    select: {
-      total: true,
-      createdAt: true,
-    },
-    orderBy: { createdAt: "asc" },
-  });
+  const purchases = await db.orm.public.Purchase
+    .where((purchase) => purchase.createdAt.gte(timestampFromDate(startOfYear)))
+    .where((purchase) => purchase.createdAt.lt(timestampFromDate(endOfYear)))
+    .select("total", "createdAt")
+    .orderBy((purchase) => purchase.createdAt.asc())
+    .all();
 
   // Aggregate totals by month
   const monthNames = [
@@ -69,7 +63,7 @@ export async function getPaymentsOverviewData() {
 
   const monthlyTotals = new Array(12).fill(0);
   for (const purchase of purchases) {
-    const month = purchase.createdAt.getMonth();
+    const month = timestampToDate(purchase.createdAt).getMonth();
     monthlyTotals[month] += purchase.total;
   }
 
@@ -93,18 +87,12 @@ export async function getWeeksProfitData() {
   const endOfWeek = new Date(startOfWeek);
   endOfWeek.setDate(startOfWeek.getDate() + 7);
 
-  const purchases = await prisma.purchase.findMany({
-    where: {
-      createdAt: {
-        gte: startOfWeek,
-        lt: endOfWeek,
-      },
-    },
-    include: {
-      details: true,
-    },
-    orderBy: { createdAt: "asc" },
-  });
+  const purchases = await db.orm.public.Purchase
+    .where((purchase) => purchase.createdAt.gte(timestampFromDate(startOfWeek)))
+    .where((purchase) => purchase.createdAt.lt(timestampFromDate(endOfWeek)))
+    .include("details")
+    .orderBy((purchase) => purchase.createdAt.asc())
+    .all();
 
   const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
   const dayDates: string[] = [];
@@ -128,7 +116,7 @@ export async function getWeeksProfitData() {
   }
 
   for (const purchase of purchases) {
-    const purchaseDate = purchase.createdAt.toISOString().split("T")[0];
+    const purchaseDate = timestampToIso(purchase.createdAt).split("T")[0];
     const dayIndex = dayDates.indexOf(purchaseDate);
     if (dayIndex === -1) continue;
 
@@ -158,11 +146,11 @@ export async function getWeeksProfitData() {
         date,
         pList.map((p) => ({
           ...p,
-          createdAt: p.createdAt.toISOString(),
-          updatedAt: p.updatedAt.toISOString(),
+          createdAt: timestampToIso(p.createdAt),
+          updatedAt: timestampToIso(p.updatedAt),
           details: p.details.map((d) => ({
             ...d,
-            createdAt: d.createdAt.toISOString(),
+            createdAt: timestampToIso(d.createdAt),
           })),
         })),
       ])
