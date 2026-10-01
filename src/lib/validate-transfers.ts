@@ -6,6 +6,7 @@ import {
   startOfLocalDay,
   withinMinutes,
 } from "@/lib/bank-transfer";
+import { hasTransferPayment, transferPortion } from "@/lib/payment-split";
 import { listBankTransfers, type PublicBankTransfer } from "@/lib/bank-transfer-store";
 import { GmailReadError, readRecentGmail } from "@/lib/read-gmail";
 import { nowTimestamp, timestampFromDate, timestampToDate } from "@/prisma/dates";
@@ -122,16 +123,27 @@ async function matchPendingPurchases(
   now: Date,
 ) {
   const purchases = await db.orm.public.Purchase
-    .where({ paymentType: "transfer" })
     .where((purchase) => purchase.createdAt.gte(timestampFromDate(startOfLocalDay(now))))
+    .select(
+      "id",
+      "total",
+      "paymentType",
+      "cashAmount",
+      "cardAmount",
+      "transferAmount",
+      "transferStatus",
+      "transferMessageId",
+      "createdAt",
+    )
     .all();
 
-  const pending = purchases.filter((purchase) => purchase.transferStatus !== "validated");
+  const withTransfer = purchases.filter((purchase) => hasTransferPayment(purchase));
+  const pending = withTransfer.filter((purchase) => purchase.transferStatus !== "validated");
   if (pending.length === 0) return 0;
 
   const expectedLlave = normalizeLlave(llave);
   const usedMessageIds = new Set(
-    purchases.map((purchase) => purchase.transferMessageId).filter((id): id is string => Boolean(id)),
+    withTransfer.map((purchase) => purchase.transferMessageId).filter((id): id is string => Boolean(id)),
   );
   const candidates = transfers.filter(
     (transfer) =>
@@ -147,7 +159,7 @@ async function matchPendingPurchases(
     const purchaseAt = timestampToDate(purchase.createdAt);
     const match = candidates
       .filter((candidate) => !claimed.has(candidate.messageId))
-      .filter((candidate) => amountsMatch(candidate.amount, purchase.total))
+      .filter((candidate) => amountsMatch(candidate.amount, transferPortion(purchase)))
       .filter((candidate) => withinMinutes(candidate.occurredAt, purchaseAt, timeWindowMinutes))
       .sort(
         (left, right) =>

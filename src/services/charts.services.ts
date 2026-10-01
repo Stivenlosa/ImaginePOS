@@ -1,3 +1,4 @@
+import { paymentShares } from "@/lib/payment-split";
 import { timestampFromDate, timestampToDate, timestampToIso } from "@/prisma/dates";
 import { db } from "@/prisma/db";
 
@@ -40,13 +41,27 @@ export async function getDevicesUsedData(
   return data;
 }
 
-export async function getPaymentsOverviewData() {
-  const now = new Date();
-  const currentYear = now.getFullYear();
+export async function listPaymentYears() {
+  const currentYear = new Date().getFullYear();
+  const rows = await db.orm.public.Purchase.select("createdAt").all();
 
-  // Get all purchases for the current year
-  const startOfYear = new Date(currentYear, 0, 1);
-  const endOfYear = new Date(currentYear + 1, 0, 1);
+  let oldest = currentYear - 1;
+  for (const row of rows) {
+    const year = timestampToDate(row.createdAt).getFullYear();
+    if (year >= 2000 && year < oldest) oldest = year;
+  }
+
+  const years: number[] = [];
+  for (let year = currentYear; year >= oldest; year -= 1) years.push(year);
+  return years;
+}
+
+export async function getPaymentsOverviewData(year = new Date().getFullYear()) {
+  const currentYear = new Date().getFullYear();
+  const selectedYear = Number.isInteger(year) && year >= 2000 && year <= currentYear ? year : currentYear;
+
+  const startOfYear = new Date(selectedYear, 0, 1);
+  const endOfYear = new Date(selectedYear + 1, 0, 1);
 
   const purchases = await db.orm.public.Purchase
     .where((purchase) => purchase.createdAt.gte(timestampFromDate(startOfYear)))
@@ -72,7 +87,7 @@ export async function getPaymentsOverviewData() {
     y: Math.round(monthlyTotals[index] * 100) / 100,
   }));
 
-  return { received };
+  return { received, year: selectedYear };
 }
 
 export async function getWeeksProfitData() {
@@ -120,12 +135,10 @@ export async function getWeeksProfitData() {
     const dayIndex = dayDates.indexOf(purchaseDate);
     if (dayIndex === -1) continue;
 
-    if (purchase.paymentType === "cash") {
-      cashByDay[dayIndex] += purchase.total;
-    } else if (purchase.paymentType === "card") {
-      cardByDay[dayIndex] += purchase.total;
-    } else if (purchase.paymentType === "transfer") {
-      transferByDay[dayIndex] += purchase.total;
+    for (const share of paymentShares(purchase)) {
+      if (share.type === "cash") cashByDay[dayIndex] += share.amount;
+      else if (share.type === "card") cardByDay[dayIndex] += share.amount;
+      else transferByDay[dayIndex] += share.amount;
     }
 
     if (purchasesByDay[purchaseDate]) {

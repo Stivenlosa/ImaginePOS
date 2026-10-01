@@ -236,7 +236,7 @@ export function SettingsClient() {
       </section>
 
       {draft && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+        <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
           <form
             onSubmit={saveUser}
             className="w-full max-w-md rounded-xl bg-white p-6 dark:bg-gray-dark"

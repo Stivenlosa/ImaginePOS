@@ -35,6 +35,7 @@ async function fetchApi<T>(
 // Product API types (matching Prisma schema)
 export type ApiProduct = {
     id: number;
+    code: string;
     name: string;
     price: number;
     image: string | null;
@@ -48,6 +49,7 @@ export type CreateProductInput = {
     price: number;
     image?: string | null;
     saleUnit?: ApiProduct["saleUnit"];
+    code?: string | null;
 };
 
 export type UpdateProductInput = Partial<CreateProductInput>;
@@ -78,5 +80,16 @@ export const productsApi = {
     delete: (id: number) =>
         fetchApi<{ message: string }>(`/products/${id}`, {
             method: "DELETE",
+        }),
+
+    // Bulk import products (from parsed CSV)
+    importMany: (products: CreateProductInput[]) =>
+        fetchApi<{
+            created: ApiProduct[];
+            createdCount: number;
+            errors: string[];
+        }>("/products/import", {
+            method: "POST",
+            body: JSON.stringify({ products }),
         }),
 };

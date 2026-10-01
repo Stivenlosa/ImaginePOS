@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { formatMoney } from "@/lib/money";
+import { hasTransferPayment, paymentShares } from "@/lib/payment-split";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "@/i18n";
 import { WeeksProfitChart } from "./chart";
@@ -27,6 +29,9 @@ type Purchase = {
   tax: number;
   total: number;
   paymentType: PaymentType;
+  cashAmount?: number | null;
+  cardAmount?: number | null;
+  transferAmount?: number | null;
   transferStatus?: "pending" | "validated" | null;
   createdAt: string;
   updatedAt: string;
@@ -47,15 +52,6 @@ export type WeeksProfitData = {
 type WeeksProfitClientProps = {
   data: WeeksProfitData;
   className?: string;
-};
-
-const PAYMENT_TYPE_STYLES: Record<
-  PaymentType,
-  { bg: string; text: string; label: string }
-> = {
-  cash: { bg: "bg-[#219653]/[0.08]", text: "text-[#219653]", label: "paymentTypes.cash" },
-  card: { bg: "bg-[#3C50E0]/[0.08]", text: "text-[#3C50E0]", label: "paymentTypes.card" },
-  transfer: { bg: "bg-[#F59E0B]/[0.08]", text: "text-[#F59E0B]", label: "paymentTypes.transfer" },
 };
 
 function getSaleUnitSuffix(unit: SaleUnit): string {
@@ -91,15 +87,18 @@ function DaySummaryModal({
 }) {
   const receiptRef = useRef<HTMLDivElement>(null);
 
-  const totalCash = purchases
-    .filter((p) => p.paymentType === "cash")
-    .reduce((sum, p) => sum + p.total, 0);
-  const totalCard = purchases
-    .filter((p) => p.paymentType === "card")
-    .reduce((sum, p) => sum + p.total, 0);
-  const totalTransfer = purchases
-    .filter((p) => p.paymentType === "transfer")
-    .reduce((sum, p) => sum + p.total, 0);
+  const totalCash = purchases.reduce(
+    (sum, purchase) => sum + (paymentShares(purchase).find((share) => share.type === "cash")?.amount ?? 0),
+    0,
+  );
+  const totalCard = purchases.reduce(
+    (sum, purchase) => sum + (paymentShares(purchase).find((share) => share.type === "card")?.amount ?? 0),
+    0,
+  );
+  const totalTransfer = purchases.reduce(
+    (sum, purchase) => sum + (paymentShares(purchase).find((share) => share.type === "transfer")?.amount ?? 0),
+    0,
+  );
   const grandTotal = totalCash + totalCard + totalTransfer;
 
   const handlePrint = () => {
@@ -151,6 +150,8 @@ function DaySummaryModal({
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
       className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
@@ -203,7 +204,7 @@ function DaySummaryModal({
                     {t("paymentTypes.cash")}
                   </span>
                   <span className="font-medium text-gray-800 dark:text-white">
-                    ${totalCash.toFixed(2)}
+                    {formatMoney(totalCash)}
                   </span>
                 </div>
                 <div className="summary-row flex justify-between text-sm">
@@ -212,7 +213,7 @@ function DaySummaryModal({
                     {t("paymentTypes.card")}
                   </span>
                   <span className="font-medium text-gray-800 dark:text-white">
-                    ${totalCard.toFixed(2)}
+                    {formatMoney(totalCard)}
                   </span>
                 </div>
                 <div className="summary-row flex justify-between text-sm">
@@ -221,14 +222,14 @@ function DaySummaryModal({
                     {t("paymentTypes.transfer")}
                   </span>
                   <span className="font-medium text-gray-800 dark:text-white">
-                    ${totalTransfer.toFixed(2)}
+                    {formatMoney(totalTransfer)}
                   </span>
                 </div>
                 <div className="summary-row total flex justify-between text-base font-bold border-t border-gray-300 dark:border-dark-4 pt-3 mt-3">
                   <span className="text-gray-800 dark:text-white">
                     {t("common.total")}
                   </span>
-                  <span className="text-green-600">${grandTotal.toFixed(2)}</span>
+                  <span className="text-green-600">{formatMoney(grandTotal)}</span>
                 </div>
               </div>
             </div>
@@ -238,21 +239,31 @@ function DaySummaryModal({
               {purchases.length === 0 ? (
                 <p className="text-sm text-gray-500">{t("weeklyProfit.noPurchasesDay")}</p>
               ) : (
-                purchases.map((purchase) => (
+                purchases.map((purchase) => {
+                  const shares = paymentShares(purchase);
+                  const paymentLabel = shares
+                    .map((share) =>
+                      shares.length > 1
+                        ? `${t(`paymentTypes.${share.type}`)} ${formatMoney(share.amount)}`
+                        : t(`paymentTypes.${share.type}`),
+                    )
+                    .join(" · ");
+                  return (
                   <div key={purchase.id} className="flex items-center justify-between gap-3 text-sm">
                     <span className="text-dark dark:text-white">
-                      #{purchase.orderNumber} · {t(`paymentTypes.${purchase.paymentType}`)}
+                      #{purchase.orderNumber} · {paymentLabel}
                     </span>
                     <span className="flex items-center gap-2">
-                      {purchase.paymentType === "transfer" && (
+                      {hasTransferPayment(purchase) && (
                         <span className={purchase.transferStatus === "validated" ? "text-[#219653]" : "text-[#F59E0B]"}>
                           {t(purchase.transferStatus === "validated" ? "purchases.validated" : "purchases.pending")}
                         </span>
                       )}
-                      <span className="font-medium text-dark dark:text-white">${purchase.total.toFixed(2)}</span>
+                      <span className="font-medium text-dark dark:text-white">{formatMoney(purchase.total)}</span>
                     </span>
                   </div>
-                ))
+                  );
+                })
               )}
             </div>
 

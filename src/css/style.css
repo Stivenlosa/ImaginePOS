@@ -6,6 +6,26 @@
   body {
     @apply bg-gray-2 text-dark-5 dark:bg-[#020D1A] dark:text-dark-6;
   }
+
+  /* Consistent keyboard focus across the whole application. Native buttons
+     and links already activate with Enter; this makes their focus visible. */
+  :where(
+    button,
+    a[href],
+    input,
+    select,
+    textarea,
+    summary,
+    [role="button"],
+    [tabindex]:not([tabindex="-1"])
+  ):focus-visible {
+    outline: 3px solid #16a34a;
+    outline-offset: 3px;
+  }
+
+  :where(button, input, select, textarea):disabled {
+    cursor: not-allowed;
+  }
 }
 
 @layer utilities {

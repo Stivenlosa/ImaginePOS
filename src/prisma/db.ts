@@ -13,6 +13,15 @@ const globalForDb = globalThis as unknown as {
   pool: Pool | undefined;
 };
 
+function isLocalPrismaPostgres(databaseUrl: string) {
+  try {
+    const { hostname, port } = new URL(databaseUrl);
+    return hostname === "localhost" && (port === "51214" || port === "51215");
+  } catch {
+    return false;
+  }
+}
+
 function getPool() {
   if (!globalForDb.pool) {
     const databaseUrl = process.env.DATABASE_URL;
@@ -21,11 +30,16 @@ function getPool() {
       throw new Error("DATABASE_URL environment variable is not set");
     }
 
+    // Local Prisma Postgres (PGlite) only accepts one connection at a time.
+    // A larger pool queues and then times out with "Connection terminated due
+    // to connection timeout".
+    const local = isLocalPrismaPostgres(databaseUrl);
+
     globalForDb.pool = new Pool({
       connectionString: databaseUrl,
-      max: 5,
-      idleTimeoutMillis: 60000,
-      connectionTimeoutMillis: 10000,
+      max: local ? 1 : 5,
+      idleTimeoutMillis: local ? 1000 : 60000,
+      connectionTimeoutMillis: local ? 60000 : 10000,
       allowExitOnIdle: true,
     });
 

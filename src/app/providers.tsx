@@ -7,6 +7,7 @@ import { CartProvider } from "@/components/cartSummary/cart-context";
 import { LanguageProvider } from "@/i18n";
 import { ThemeProvider } from "next-themes";
 import PaymentAnnouncer from "@/components/PaymentAnnouncer/PaymentAnnouncer";
+import { ArrowFocusNavigator } from "@/components/keyboard/arrow-focus-navigator";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -16,6 +17,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <SidebarProvider>
           <CartProvider>
             <RegisterServiceWorker />
+            <ArrowFocusNavigator />
             <PaymentAnnouncer />
             {children}
           </CartProvider>

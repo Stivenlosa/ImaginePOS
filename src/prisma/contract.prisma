@@ -26,9 +26,20 @@ native_enum TransferStatus {
   validated = "validated"
 }
 
+native_enum BusinessDayStatus {
+  open   = "open"
+  closed = "closed"
+}
+
+native_enum RegisterSessionStatus {
+  open   = "open"
+  closed = "closed"
+}
+
 // Timestamps are timestamp(3) without time zone, holding UTC wall-clock values (Prisma 7 layout).
 model Product {
   id        Int               @id(map: "products_pkey") @default(autoincrement())
+  code      String
   name      String
   price     Float
   image     String?
@@ -38,6 +49,7 @@ model Product {
 
   purchaseDetails PurchaseDetail[]
 
+  @@index([code], map: "products_code_key", unique: true)
   @@map("products")
 }
 
@@ -48,17 +60,26 @@ model Purchase {
   tax         Float
   total       Float
   paymentType       pg.enum(PaymentType)
+  cashAmount        Float                    @default(0)
+  cardAmount        Float                    @default(0)
+  transferAmount    Float                    @default(0)
   transferStatus    pg.enum(TransferStatus)?
   payerName         String?
   validatedAt       Timestamp(3)?
   transferMessageId String?
+  registerSessionId Int?
+  cashierUserId     Int?
   createdAt         Timestamp(3)         @default(now())
   updatedAt         Timestamp(3)
 
-  details PurchaseDetail[]
+  details         PurchaseDetail[]
+  registerSession RegisterSession? @relation(fields: [registerSessionId], references: [id], onDelete: SetNull, onUpdate: Cascade, map: "purchases_registerSessionId_fkey", index: false)
+  cashier         User?            @relation("PurchaseCashier", fields: [cashierUserId], references: [id], onDelete: SetNull, onUpdate: Cascade, map: "purchases_cashierUserId_fkey", index: false)
 
   @@index([orderNumber], map: "purchases_orderNumber_key", unique: true)
   @@index([transferMessageId], map: "purchases_transferMessageId_key", unique: true)
+  @@index([registerSessionId], map: "purchases_registerSessionId_idx")
+  @@index([cashierUserId], map: "purchases_cashierUserId_idx")
   @@map("purchases")
 }
 
@@ -124,6 +145,77 @@ model PurchaseDetail {
   @@map("purchase_details")
 }
 
+model Register {
+  id        Int          @id(map: "registers_pkey") @default(autoincrement())
+  number    Int
+  name      String?
+  active    Boolean      @default(true)
+  createdAt Timestamp(3) @default(now())
+  updatedAt Timestamp(3)
+
+  sessions RegisterSession[]
+
+  @@index([number], map: "registers_number_key", unique: true)
+  @@map("registers")
+}
+
+model BusinessDay {
+  id               Int                    @id(map: "business_days_pkey") @default(autoincrement())
+  businessDate     String
+  status           pg.enum(BusinessDayStatus) @default("open")
+  openedAt         Timestamp(3)           @default(now())
+  openedByUserId   Int
+  closedAt         Timestamp(3)?
+  closedByUserId   Int?
+  purchaseCount    Int?
+  totalSales       Float?
+  totalCash        Float?
+  totalCard        Float?
+  totalTransfer    Float?
+  totalExpectedCash Float?
+  totalCountedCash Float?
+  totalCashVariance Float?
+
+  openedBy User  @relation("BusinessDayOpenedBy", fields: [openedByUserId], references: [id], onDelete: Restrict, onUpdate: Cascade, map: "business_days_openedByUserId_fkey", index: false)
+  closedBy User? @relation("BusinessDayClosedBy", fields: [closedByUserId], references: [id], onDelete: SetNull, onUpdate: Cascade, map: "business_days_closedByUserId_fkey", index: false)
+  sessions RegisterSession[]
+
+  @@index([businessDate], map: "business_days_businessDate_key", unique: true)
+  @@map("business_days")
+}
+
+model RegisterSession {
+  id              Int                         @id(map: "register_sessions_pkey") @default(autoincrement())
+  registerId      Int
+  businessDayId   Int
+  cashierUserId   Int
+  openedByUserId  Int
+  closedByUserId  Int?
+  status          pg.enum(RegisterSessionStatus) @default("open")
+  openingFloat    Float                       @default(0)
+  openedAt        Timestamp(3)                @default(now())
+  closedAt        Timestamp(3)?
+  purchaseCount   Int?
+  totalSales      Float?
+  cashTotal       Float?
+  cardTotal       Float?
+  transferTotal   Float?
+  expectedCash    Float?
+  countedCash     Float?
+  cashVariance    Float?
+
+  register    Register    @relation(fields: [registerId], references: [id], onDelete: Restrict, onUpdate: Cascade, map: "register_sessions_registerId_fkey", index: false)
+  businessDay BusinessDay @relation(fields: [businessDayId], references: [id], onDelete: Restrict, onUpdate: Cascade, map: "register_sessions_businessDayId_fkey", index: false)
+  cashier     User        @relation("SessionCashier", fields: [cashierUserId], references: [id], onDelete: Restrict, onUpdate: Cascade, map: "register_sessions_cashierUserId_fkey", index: false)
+  openedBy    User        @relation("SessionOpenedBy", fields: [openedByUserId], references: [id], onDelete: Restrict, onUpdate: Cascade, map: "register_sessions_openedByUserId_fkey", index: false)
+  closedBy    User?       @relation("SessionClosedBy", fields: [closedByUserId], references: [id], onDelete: SetNull, onUpdate: Cascade, map: "register_sessions_closedByUserId_fkey", index: false)
+  purchases   Purchase[]
+
+  @@index([registerId], map: "register_sessions_registerId_idx")
+  @@index([businessDayId], map: "register_sessions_businessDayId_idx")
+  @@map("register_sessions")
+}
+
 model User {
   id           Int                @id(map: "users_pkey") @default(autoincrement())
   name         String
@@ -133,6 +225,13 @@ model User {
   active       Boolean            @default(true)
   createdAt    Timestamp(3)       @default(now())
   updatedAt    Timestamp(3)
+
+  openedBusinessDays BusinessDay[]     @relation("BusinessDayOpenedBy")
+  closedBusinessDays BusinessDay[]     @relation("BusinessDayClosedBy")
+  cashierSessions    RegisterSession[] @relation("SessionCashier")
+  openedSessions     RegisterSession[] @relation("SessionOpenedBy")
+  closedSessions     RegisterSession[] @relation("SessionClosedBy")
+  purchasesAsCashier Purchase[]        @relation("PurchaseCashier")
 
   @@index([username], map: "users_username_key", unique: true)
   @@map("users")

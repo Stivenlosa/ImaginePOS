@@ -12,6 +12,10 @@
       "model": "BankTransfer",
       "namespace": "public"
     },
+    "business_days": {
+      "model": "BusinessDay",
+      "namespace": "public"
+    },
     "products": {
       "model": "Product",
       "namespace": "public"
@@ -22,6 +26,14 @@
     },
     "purchases": {
       "model": "Purchase",
+      "namespace": "public"
+    },
+    "register_sessions": {
+      "model": "RegisterSession",
+      "namespace": "public"
+    },
+    "registers": {
+      "model": "Register",
       "namespace": "public"
     },
     "transfer_configs": {
@@ -238,8 +250,233 @@
               "table": "bank_transfers"
             }
           },
+          "BusinessDay": {
+            "fields": {
+              "businessDate": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "closedAt": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/timestamp-temporal@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "precision": 3
+                  }
+                }
+              },
+              "closedByUserId": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "openedAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamp-temporal@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "precision": 3
+                  }
+                }
+              },
+              "openedByUserId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "purchaseCount": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "status": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/enum@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "typeName": "BusinessDayStatus"
+                  }
+                }
+              },
+              "totalCard": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/float8@1",
+                  "kind": "scalar"
+                }
+              },
+              "totalCash": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/float8@1",
+                  "kind": "scalar"
+                }
+              },
+              "totalCashVariance": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/float8@1",
+                  "kind": "scalar"
+                }
+              },
+              "totalCountedCash": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/float8@1",
+                  "kind": "scalar"
+                }
+              },
+              "totalExpectedCash": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/float8@1",
+                  "kind": "scalar"
+                }
+              },
+              "totalSales": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/float8@1",
+                  "kind": "scalar"
+                }
+              },
+              "totalTransfer": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/float8@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {
+              "closedBy": {
+                "cardinality": "N:1",
+                "nullable": true,
+                "on": {
+                  "localFields": [
+                    "closedByUserId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "User",
+                  "namespace": "public"
+                }
+              },
+              "openedBy": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "openedByUserId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "User",
+                  "namespace": "public"
+                }
+              },
+              "sessions": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "businessDayId"
+                  ]
+                },
+                "to": {
+                  "model": "RegisterSession",
+                  "namespace": "public"
+                }
+              }
+            },
+            "storage": {
+              "fields": {
+                "businessDate": {
+                  "column": "businessDate"
+                },
+                "closedAt": {
+                  "column": "closedAt"
+                },
+                "closedByUserId": {
+                  "column": "closedByUserId"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "openedAt": {
+                  "column": "openedAt"
+                },
+                "openedByUserId": {
+                  "column": "openedByUserId"
+                },
+                "purchaseCount": {
+                  "column": "purchaseCount"
+                },
+                "status": {
+                  "column": "status"
+                },
+                "totalCard": {
+                  "column": "totalCard"
+                },
+                "totalCash": {
+                  "column": "totalCash"
+                },
+                "totalCashVariance": {
+                  "column": "totalCashVariance"
+                },
+                "totalCountedCash": {
+                  "column": "totalCountedCash"
+                },
+                "totalExpectedCash": {
+                  "column": "totalExpectedCash"
+                },
+                "totalSales": {
+                  "column": "totalSales"
+                },
+                "totalTransfer": {
+                  "column": "totalTransfer"
+                }
+              },
+              "namespaceId": "public",
+              "table": "business_days"
+            }
+          },
           "Product": {
             "fields": {
+              "code": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "createdAt": {
                 "nullable": false,
                 "type": {
@@ -318,6 +555,9 @@
             },
             "storage": {
               "fields": {
+                "code": {
+                  "column": "code"
+                },
                 "createdAt": {
                   "column": "createdAt"
                 },
@@ -346,6 +586,27 @@
           },
           "Purchase": {
             "fields": {
+              "cardAmount": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/float8@1",
+                  "kind": "scalar"
+                }
+              },
+              "cashAmount": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/float8@1",
+                  "kind": "scalar"
+                }
+              },
+              "cashierUserId": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
               "createdAt": {
                 "nullable": false,
                 "type": {
@@ -387,6 +648,13 @@
                   }
                 }
               },
+              "registerSessionId": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
               "subtotal": {
                 "nullable": false,
                 "type": {
@@ -402,6 +670,13 @@
                 }
               },
               "total": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/float8@1",
+                  "kind": "scalar"
+                }
+              },
+              "transferAmount": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/float8@1",
@@ -447,6 +722,22 @@
               }
             },
             "relations": {
+              "cashier": {
+                "cardinality": "N:1",
+                "nullable": true,
+                "on": {
+                  "localFields": [
+                    "cashierUserId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "User",
+                  "namespace": "public"
+                }
+              },
               "details": {
                 "cardinality": "1:N",
                 "on": {
@@ -461,10 +752,35 @@
                   "model": "PurchaseDetail",
                   "namespace": "public"
                 }
+              },
+              "registerSession": {
+                "cardinality": "N:1",
+                "nullable": true,
+                "on": {
+                  "localFields": [
+                    "registerSessionId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "RegisterSession",
+                  "namespace": "public"
+                }
               }
             },
             "storage": {
               "fields": {
+                "cardAmount": {
+                  "column": "cardAmount"
+                },
+                "cashAmount": {
+                  "column": "cashAmount"
+                },
+                "cashierUserId": {
+                  "column": "cashierUserId"
+                },
                 "createdAt": {
                   "column": "createdAt"
                 },
@@ -480,6 +796,9 @@
                 "paymentType": {
                   "column": "paymentType"
                 },
+                "registerSessionId": {
+                  "column": "registerSessionId"
+                },
                 "subtotal": {
                   "column": "subtotal"
                 },
@@ -488,6 +807,9 @@
                 },
                 "total": {
                   "column": "total"
+                },
+                "transferAmount": {
+                  "column": "transferAmount"
                 },
                 "transferMessageId": {
                   "column": "transferMessageId"
@@ -656,6 +978,395 @@
               "table": "purchase_details"
             }
           },
+          "Register": {
+            "fields": {
+              "active": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
+                  "kind": "scalar"
+                }
+              },
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamp-temporal@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "precision": 3
+                  }
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "name": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "number": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "updatedAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamp-temporal@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "precision": 3
+                  }
+                }
+              }
+            },
+            "relations": {
+              "sessions": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "registerId"
+                  ]
+                },
+                "to": {
+                  "model": "RegisterSession",
+                  "namespace": "public"
+                }
+              }
+            },
+            "storage": {
+              "fields": {
+                "active": {
+                  "column": "active"
+                },
+                "createdAt": {
+                  "column": "createdAt"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "name": {
+                  "column": "name"
+                },
+                "number": {
+                  "column": "number"
+                },
+                "updatedAt": {
+                  "column": "updatedAt"
+                }
+              },
+              "namespaceId": "public",
+              "table": "registers"
+            }
+          },
+          "RegisterSession": {
+            "fields": {
+              "businessDayId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "cardTotal": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/float8@1",
+                  "kind": "scalar"
+                }
+              },
+              "cashTotal": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/float8@1",
+                  "kind": "scalar"
+                }
+              },
+              "cashVariance": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/float8@1",
+                  "kind": "scalar"
+                }
+              },
+              "cashierUserId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "closedAt": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/timestamp-temporal@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "precision": 3
+                  }
+                }
+              },
+              "closedByUserId": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "countedCash": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/float8@1",
+                  "kind": "scalar"
+                }
+              },
+              "expectedCash": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/float8@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "openedAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamp-temporal@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "precision": 3
+                  }
+                }
+              },
+              "openedByUserId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "openingFloat": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/float8@1",
+                  "kind": "scalar"
+                }
+              },
+              "purchaseCount": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "registerId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "status": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/enum@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "typeName": "RegisterSessionStatus"
+                  }
+                }
+              },
+              "totalSales": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/float8@1",
+                  "kind": "scalar"
+                }
+              },
+              "transferTotal": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/float8@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {
+              "businessDay": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "businessDayId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "BusinessDay",
+                  "namespace": "public"
+                }
+              },
+              "cashier": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "cashierUserId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "User",
+                  "namespace": "public"
+                }
+              },
+              "closedBy": {
+                "cardinality": "N:1",
+                "nullable": true,
+                "on": {
+                  "localFields": [
+                    "closedByUserId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "User",
+                  "namespace": "public"
+                }
+              },
+              "openedBy": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "openedByUserId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "User",
+                  "namespace": "public"
+                }
+              },
+              "purchases": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "registerSessionId"
+                  ]
+                },
+                "to": {
+                  "model": "Purchase",
+                  "namespace": "public"
+                }
+              },
+              "register": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "registerId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Register",
+                  "namespace": "public"
+                }
+              }
+            },
+            "storage": {
+              "fields": {
+                "businessDayId": {
+                  "column": "businessDayId"
+                },
+                "cardTotal": {
+                  "column": "cardTotal"
+                },
+                "cashTotal": {
+                  "column": "cashTotal"
+                },
+                "cashVariance": {
+                  "column": "cashVariance"
+                },
+                "cashierUserId": {
+                  "column": "cashierUserId"
+                },
+                "closedAt": {
+                  "column": "closedAt"
+                },
+                "closedByUserId": {
+                  "column": "closedByUserId"
+                },
+                "countedCash": {
+                  "column": "countedCash"
+                },
+                "expectedCash": {
+                  "column": "expectedCash"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "openedAt": {
+                  "column": "openedAt"
+                },
+                "openedByUserId": {
+                  "column": "openedByUserId"
+                },
+                "openingFloat": {
+                  "column": "openingFloat"
+                },
+                "purchaseCount": {
+                  "column": "purchaseCount"
+                },
+                "registerId": {
+                  "column": "registerId"
+                },
+                "status": {
+                  "column": "status"
+                },
+                "totalSales": {
+                  "column": "totalSales"
+                },
+                "transferTotal": {
+                  "column": "transferTotal"
+                }
+              },
+              "namespaceId": "public",
+              "table": "register_sessions"
+            }
+          },
           "TransferConfig": {
             "fields": {
               "gmailAddress": {
@@ -798,7 +1509,98 @@
                 }
               }
             },
-            "relations": {},
+            "relations": {
+              "cashierSessions": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "cashierUserId"
+                  ]
+                },
+                "to": {
+                  "model": "RegisterSession",
+                  "namespace": "public"
+                }
+              },
+              "closedBusinessDays": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "closedByUserId"
+                  ]
+                },
+                "to": {
+                  "model": "BusinessDay",
+                  "namespace": "public"
+                }
+              },
+              "closedSessions": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "closedByUserId"
+                  ]
+                },
+                "to": {
+                  "model": "RegisterSession",
+                  "namespace": "public"
+                }
+              },
+              "openedBusinessDays": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "openedByUserId"
+                  ]
+                },
+                "to": {
+                  "model": "BusinessDay",
+                  "namespace": "public"
+                }
+              },
+              "openedSessions": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "openedByUserId"
+                  ]
+                },
+                "to": {
+                  "model": "RegisterSession",
+                  "namespace": "public"
+                }
+              },
+              "purchasesAsCashier": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "cashierUserId"
+                  ]
+                },
+                "to": {
+                  "model": "Purchase",
+                  "namespace": "public"
+                }
+              }
+            },
             "storage": {
               "fields": {
                 "active": {
@@ -839,6 +1641,14 @@
       "public": {
         "entries": {
           "native_enum": {
+            "BusinessDayStatus": {
+              "kind": "postgres-enum",
+              "members": [
+                "open",
+                "closed"
+              ],
+              "typeName": "BusinessDayStatus"
+            },
             "PaymentType": {
               "kind": "postgres-enum",
               "members": [
@@ -847,6 +1657,14 @@
                 "transfer"
               ],
               "typeName": "PaymentType"
+            },
+            "RegisterSessionStatus": {
+              "kind": "postgres-enum",
+              "members": [
+                "open",
+                "closed"
+              ],
+              "typeName": "RegisterSessionStatus"
             },
             "SaleUnit": {
               "kind": "postgres-enum",
@@ -1051,8 +1869,175 @@
               },
               "uniques": []
             },
+            "business_days": {
+              "columns": {
+                "businessDate": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "closedAt": {
+                  "codecId": "pg/timestamp-temporal@1",
+                  "nativeType": "timestamp",
+                  "nullable": true,
+                  "typeParams": {
+                    "precision": 3
+                  }
+                },
+                "closedByUserId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": true
+                },
+                "id": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "expression": "autoincrement()",
+                    "kind": "function"
+                  },
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "openedAt": {
+                  "codecId": "pg/timestamp-temporal@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamp",
+                  "nullable": false,
+                  "typeParams": {
+                    "precision": 3
+                  }
+                },
+                "openedByUserId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "purchaseCount": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": true
+                },
+                "status": {
+                  "codecId": "pg/enum@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": "open"
+                  },
+                  "nativeType": "BusinessDayStatus",
+                  "nullable": false,
+                  "typeParams": {
+                    "typeName": "BusinessDayStatus"
+                  },
+                  "valueSet": {
+                    "entityKind": "valueSet",
+                    "entityName": "BusinessDayStatus",
+                    "namespaceId": "public",
+                    "plane": "storage"
+                  }
+                },
+                "totalCard": {
+                  "codecId": "pg/float8@1",
+                  "nativeType": "float8",
+                  "nullable": true
+                },
+                "totalCash": {
+                  "codecId": "pg/float8@1",
+                  "nativeType": "float8",
+                  "nullable": true
+                },
+                "totalCashVariance": {
+                  "codecId": "pg/float8@1",
+                  "nativeType": "float8",
+                  "nullable": true
+                },
+                "totalCountedCash": {
+                  "codecId": "pg/float8@1",
+                  "nativeType": "float8",
+                  "nullable": true
+                },
+                "totalExpectedCash": {
+                  "codecId": "pg/float8@1",
+                  "nativeType": "float8",
+                  "nullable": true
+                },
+                "totalSales": {
+                  "codecId": "pg/float8@1",
+                  "nativeType": "float8",
+                  "nullable": true
+                },
+                "totalTransfer": {
+                  "codecId": "pg/float8@1",
+                  "nativeType": "float8",
+                  "nullable": true
+                }
+              },
+              "foreignKeys": [
+                {
+                  "name": "business_days_openedByUserId_fkey",
+                  "onDelete": "restrict",
+                  "onUpdate": "cascade",
+                  "source": {
+                    "columns": [
+                      "openedByUserId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "business_days"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "users"
+                  }
+                },
+                {
+                  "name": "business_days_closedByUserId_fkey",
+                  "onDelete": "setNull",
+                  "onUpdate": "cascade",
+                  "source": {
+                    "columns": [
+                      "closedByUserId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "business_days"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "users"
+                  }
+                }
+              ],
+              "indexes": [
+                {
+                  "columns": [
+                    "businessDate"
+                  ],
+                  "name": "business_days_businessDate_key",
+                  "unique": true
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ],
+                "name": "business_days_pkey"
+              },
+              "uniques": []
+            },
             "products": {
               "columns": {
+                "code": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
                 "createdAt": {
                   "codecId": "pg/timestamp-temporal@1",
                   "default": {
@@ -1117,7 +2102,15 @@
                 }
               },
               "foreignKeys": [],
-              "indexes": [],
+              "indexes": [
+                {
+                  "columns": [
+                    "code"
+                  ],
+                  "name": "products_code_key",
+                  "unique": true
+                }
+              ],
               "primaryKey": {
                 "columns": [
                   "id"
@@ -1254,6 +2247,29 @@
             },
             "purchases": {
               "columns": {
+                "cardAmount": {
+                  "codecId": "pg/float8@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": 0
+                  },
+                  "nativeType": "float8",
+                  "nullable": false
+                },
+                "cashAmount": {
+                  "codecId": "pg/float8@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": 0
+                  },
+                  "nativeType": "float8",
+                  "nullable": false
+                },
+                "cashierUserId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": true
+                },
                 "createdAt": {
                   "codecId": "pg/timestamp-temporal@1",
                   "default": {
@@ -1299,6 +2315,11 @@
                     "plane": "storage"
                   }
                 },
+                "registerSessionId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": true
+                },
                 "subtotal": {
                   "codecId": "pg/float8@1",
                   "nativeType": "float8",
@@ -1311,6 +2332,15 @@
                 },
                 "total": {
                   "codecId": "pg/float8@1",
+                  "nativeType": "float8",
+                  "nullable": false
+                },
+                "transferAmount": {
+                  "codecId": "pg/float8@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": 0
+                  },
                   "nativeType": "float8",
                   "nullable": false
                 },
@@ -1350,14 +2380,67 @@
                   }
                 }
               },
-              "foreignKeys": [],
+              "foreignKeys": [
+                {
+                  "name": "purchases_registerSessionId_fkey",
+                  "onDelete": "setNull",
+                  "onUpdate": "cascade",
+                  "source": {
+                    "columns": [
+                      "registerSessionId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "purchases"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "register_sessions"
+                  }
+                },
+                {
+                  "name": "purchases_cashierUserId_fkey",
+                  "onDelete": "setNull",
+                  "onUpdate": "cascade",
+                  "source": {
+                    "columns": [
+                      "cashierUserId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "purchases"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "users"
+                  }
+                }
+              ],
               "indexes": [
+                {
+                  "columns": [
+                    "cashierUserId"
+                  ],
+                  "name": "purchases_cashierUserId_idx",
+                  "unique": false
+                },
                 {
                   "columns": [
                     "orderNumber"
                   ],
                   "name": "purchases_orderNumber_key",
                   "unique": true
+                },
+                {
+                  "columns": [
+                    "registerSessionId"
+                  ],
+                  "name": "purchases_registerSessionId_idx",
+                  "unique": false
                 },
                 {
                   "columns": [
@@ -1372,6 +2455,320 @@
                   "id"
                 ],
                 "name": "purchases_pkey"
+              },
+              "uniques": []
+            },
+            "register_sessions": {
+              "columns": {
+                "businessDayId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "cardTotal": {
+                  "codecId": "pg/float8@1",
+                  "nativeType": "float8",
+                  "nullable": true
+                },
+                "cashTotal": {
+                  "codecId": "pg/float8@1",
+                  "nativeType": "float8",
+                  "nullable": true
+                },
+                "cashVariance": {
+                  "codecId": "pg/float8@1",
+                  "nativeType": "float8",
+                  "nullable": true
+                },
+                "cashierUserId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "closedAt": {
+                  "codecId": "pg/timestamp-temporal@1",
+                  "nativeType": "timestamp",
+                  "nullable": true,
+                  "typeParams": {
+                    "precision": 3
+                  }
+                },
+                "closedByUserId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": true
+                },
+                "countedCash": {
+                  "codecId": "pg/float8@1",
+                  "nativeType": "float8",
+                  "nullable": true
+                },
+                "expectedCash": {
+                  "codecId": "pg/float8@1",
+                  "nativeType": "float8",
+                  "nullable": true
+                },
+                "id": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "expression": "autoincrement()",
+                    "kind": "function"
+                  },
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "openedAt": {
+                  "codecId": "pg/timestamp-temporal@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamp",
+                  "nullable": false,
+                  "typeParams": {
+                    "precision": 3
+                  }
+                },
+                "openedByUserId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "openingFloat": {
+                  "codecId": "pg/float8@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": 0
+                  },
+                  "nativeType": "float8",
+                  "nullable": false
+                },
+                "purchaseCount": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": true
+                },
+                "registerId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "status": {
+                  "codecId": "pg/enum@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": "open"
+                  },
+                  "nativeType": "RegisterSessionStatus",
+                  "nullable": false,
+                  "typeParams": {
+                    "typeName": "RegisterSessionStatus"
+                  },
+                  "valueSet": {
+                    "entityKind": "valueSet",
+                    "entityName": "RegisterSessionStatus",
+                    "namespaceId": "public",
+                    "plane": "storage"
+                  }
+                },
+                "totalSales": {
+                  "codecId": "pg/float8@1",
+                  "nativeType": "float8",
+                  "nullable": true
+                },
+                "transferTotal": {
+                  "codecId": "pg/float8@1",
+                  "nativeType": "float8",
+                  "nullable": true
+                }
+              },
+              "foreignKeys": [
+                {
+                  "name": "register_sessions_registerId_fkey",
+                  "onDelete": "restrict",
+                  "onUpdate": "cascade",
+                  "source": {
+                    "columns": [
+                      "registerId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "register_sessions"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "registers"
+                  }
+                },
+                {
+                  "name": "register_sessions_businessDayId_fkey",
+                  "onDelete": "restrict",
+                  "onUpdate": "cascade",
+                  "source": {
+                    "columns": [
+                      "businessDayId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "register_sessions"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "business_days"
+                  }
+                },
+                {
+                  "name": "register_sessions_cashierUserId_fkey",
+                  "onDelete": "restrict",
+                  "onUpdate": "cascade",
+                  "source": {
+                    "columns": [
+                      "cashierUserId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "register_sessions"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "users"
+                  }
+                },
+                {
+                  "name": "register_sessions_openedByUserId_fkey",
+                  "onDelete": "restrict",
+                  "onUpdate": "cascade",
+                  "source": {
+                    "columns": [
+                      "openedByUserId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "register_sessions"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "users"
+                  }
+                },
+                {
+                  "name": "register_sessions_closedByUserId_fkey",
+                  "onDelete": "setNull",
+                  "onUpdate": "cascade",
+                  "source": {
+                    "columns": [
+                      "closedByUserId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "register_sessions"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "users"
+                  }
+                }
+              ],
+              "indexes": [
+                {
+                  "columns": [
+                    "businessDayId"
+                  ],
+                  "name": "register_sessions_businessDayId_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "registerId"
+                  ],
+                  "name": "register_sessions_registerId_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ],
+                "name": "register_sessions_pkey"
+              },
+              "uniques": []
+            },
+            "registers": {
+              "columns": {
+                "active": {
+                  "codecId": "pg/bool@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": true
+                  },
+                  "nativeType": "bool",
+                  "nullable": false
+                },
+                "createdAt": {
+                  "codecId": "pg/timestamp-temporal@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamp",
+                  "nullable": false,
+                  "typeParams": {
+                    "precision": 3
+                  }
+                },
+                "id": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "expression": "autoincrement()",
+                    "kind": "function"
+                  },
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "name": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "number": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "updatedAt": {
+                  "codecId": "pg/timestamp-temporal@1",
+                  "nativeType": "timestamp",
+                  "nullable": false,
+                  "typeParams": {
+                    "precision": 3
+                  }
+                }
+              },
+              "foreignKeys": [],
+              "indexes": [
+                {
+                  "columns": [
+                    "number"
+                  ],
+                  "name": "registers_number_key",
+                  "unique": true
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ],
+                "name": "registers_pkey"
               },
               "uniques": []
             },
@@ -1519,12 +2916,26 @@
             }
           },
           "valueSet": {
+            "BusinessDayStatus": {
+              "kind": "valueSet",
+              "values": [
+                "open",
+                "closed"
+              ]
+            },
             "PaymentType": {
               "kind": "valueSet",
               "values": [
                 "cash",
                 "card",
                 "transfer"
+              ]
+            },
+            "RegisterSessionStatus": {
+              "kind": "valueSet",
+              "values": [
+                "open",
+                "closed"
               ]
             },
             "SaleUnit": {
@@ -1559,7 +2970,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "6bbed76b3cf3ca16e46af8c1f9c31951dfbf7937cff229750f08996927f0e95a"
+    "storageHash": "4fd753d9e97684222e2e688ca16887f970d94c2af1fb4fa4ff3ee4460f6c8990"
   },
   "capabilities": {
     "postgres": {

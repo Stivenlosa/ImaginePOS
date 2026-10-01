@@ -3,6 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import type { SessionUser } from "@/types/user";
+import { startWindowSession } from "./window-session";
 
 type AuthContextValue = {
   user: SessionUser | null;
@@ -33,7 +34,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    void refresh();
+    const windowSession = startWindowSession();
+    let cancelled = false;
+
+    (async () => {
+      if (windowSession.shouldLogout) {
+        await fetch("/api/auth/logout", { method: "POST" });
+        if (cancelled) return;
+        setUser(null);
+        setReady(true);
+        return;
+      }
+
+      await fetch("/api/auth/resume", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ t: Date.now() }),
+      });
+      if (!cancelled) await refresh();
+    })();
+
+    return () => {
+      cancelled = true;
+      windowSession.stop();
+    };
   }, [refresh]);
 
   useEffect(() => {

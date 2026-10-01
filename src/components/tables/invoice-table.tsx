@@ -66,7 +66,7 @@ export function InvoiceTable({ className, purchases }: InvoiceTableProps) {
   return (
     <div
       className={cn(
-        "rounded-[10px] border border-stroke bg-white p-4 shadow-1 dark:border-dark-3 dark:bg-gray-dark dark:shadow-card sm:p-7.5",
+        "flex h-[32rem] flex-col overflow-hidden rounded-[10px] border border-stroke bg-white p-4 shadow-1 dark:border-dark-3 dark:bg-gray-dark dark:shadow-card sm:p-7.5",
         className
       )}
     >

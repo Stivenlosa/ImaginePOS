@@ -19,6 +19,8 @@
     "dayjs": "^1.11.13",
     "flatpickr": "^4.6.13",
     "imapflow": "^2.2.1",
+    "jsbarcode": "^3.12.3",
+    "jspdf": "^4.2.1",
     "jsvectormap": "^1.6.0",
     "mailparser": "^3.9.33",
     "next": "^15.5.2",
@@ -32,6 +34,7 @@
     "temporal-polyfill": "^1.0.5"
   },
   "devDependencies": {
+    "@types/jsbarcode": "^3.11.4",
     "@types/mailparser": "^3.9.0",
     "@types/node": "^22",
     "@types/pg": "^8.16.0",

@@ -1,10 +1,13 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useCart, type SavedCart } from "./cart-context";
-import { getSaleUnitSuffix, isWeightBasedUnit, calculateItemTotal, CartItem } from "@/types/product";
+import { formatMoney, roundMoney } from "@/lib/money";
+import { parseTenderDraft, paymentShares, resolveTender, type TenderLine } from "@/lib/payment-split";
+import { getSaleUnitSuffix, isWeightBasedUnit, calculateItemTotal, CartItem, PAYMENT_TYPES, type PaymentType } from "@/types/product";
 import { useTranslation } from "@/i18n";
 
-type PaymentType = "cash" | "card" | "transfer";
+const FOCUS_BTN =
+    "outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-dark";
 
 function formatSavedAgo(savedAt: number): string {
     const seconds = Math.max(0, Math.floor((Date.now() - savedAt) / 1000));
@@ -129,7 +132,7 @@ function SavedCartsModal({ isOpen, onClose, savedCarts, onRestore, onDelete, t }
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div role="dialog" aria-modal="true" className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
             <div className="bg-white dark:bg-gray-dark rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-hidden flex flex-col">
                 <div className="bg-green-600 text-white p-6 text-center">
                     <h2 className="text-xl font-bold">{t("cart.savedCartsTitle")}</h2>
@@ -157,22 +160,24 @@ function SavedCartsModal({ isOpen, onClose, savedCarts, onRestore, onDelete, t }
                                             </p>
                                         </div>
                                         <p className="font-bold text-green-600 text-lg">
-                                            ${saved.total.toFixed(2)}
+                                            {formatMoney(saved.total)}
                                         </p>
                                     </div>
                                     <div className="flex gap-2">
                                         <button
+                                            type="button"
                                             onClick={() => {
                                                 onRestore(saved.id);
                                                 onClose();
                                             }}
-                                            className="flex-1 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-500 transition"
+                                            className={`flex-1 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-500 transition ${FOCUS_BTN}`}
                                         >
                                             {t("cart.useCart")}
                                         </button>
                                         <button
+                                            type="button"
                                             onClick={() => onDelete(saved.id)}
-                                            className="px-4 py-2 text-sm bg-red-500 text-white rounded-lg hover:bg-red-400 transition"
+                                            className={`px-4 py-2 text-sm bg-red-500 text-white rounded-lg hover:bg-red-400 transition ${FOCUS_BTN}`}
                                         >
                                             {t("common.delete")}
                                         </button>
@@ -185,8 +190,9 @@ function SavedCartsModal({ isOpen, onClose, savedCarts, onRestore, onDelete, t }
 
                 <div className="p-6 border-t dark:border-dark-4 bg-gray-50 dark:bg-dark-2">
                     <button
+                        type="button"
                         onClick={onClose}
-                        className="w-full py-3 bg-gray-200 dark:bg-dark-3 text-gray-700 dark:text-dark-6 rounded-xl hover:bg-gray-300 dark:hover:bg-dark-4 transition"
+                        className={`w-full py-3 bg-gray-200 dark:bg-dark-3 text-gray-700 dark:text-dark-6 rounded-xl hover:bg-gray-300 dark:hover:bg-dark-4 transition ${FOCUS_BTN}`}
                     >
                         {t("common.close")}
                     </button>
@@ -196,69 +202,206 @@ function SavedCartsModal({ isOpen, onClose, savedCarts, onRestore, onDelete, t }
     );
 }
 
-// Payment Type Selection Modal
+const PAYMENT_OPTIONS: { type: PaymentType; labelKey: string }[] = [
+    { type: "cash", labelKey: "paymentTypes.cash" },
+    { type: "card", labelKey: "paymentTypes.card" },
+    { type: "transfer", labelKey: "paymentTypes.transfer" },
+];
+
+function PaymentOptionIcon({ type, className }: { type: PaymentType; className?: string }) {
+    if (type === "cash") return <CashIcon className={className} />;
+    if (type === "card") return <CardIcon className={className} />;
+    return <TransferIcon className={className} />;
+}
+
+// Payment type selection. One method is the fast path. Two or three methods split the total.
 interface PaymentModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onConfirm: (paymentType: PaymentType) => void;
+    onConfirm: (payments: TenderLine[]) => void;
     total: number;
     isProcessing: boolean;
     t: (key: string, params?: Record<string, string | number>) => string;
 }
 
 function PaymentModal({ isOpen, onClose, onConfirm, total, isProcessing, t }: PaymentModalProps) {
-    const [selectedPayment, setSelectedPayment] = useState<PaymentType>("cash");
+    const [selected, setSelected] = useState<PaymentType[]>(["cash"]);
+    const [drafts, setDrafts] = useState<Partial<Record<PaymentType, string>>>({});
+    const [drivenBy, setDrivenBy] = useState<PaymentType | null>(null);
+    const [wasOpen, setWasOpen] = useState(false);
+    const cashInputRef = useRef<HTMLInputElement>(null);
+
+    if (isOpen !== wasOpen) {
+        setWasOpen(isOpen);
+        if (isOpen) {
+            setSelected(["cash"]);
+            setDrafts({});
+            setDrivenBy(null);
+        }
+    }
+
+    const typed = useMemo(() => {
+        const values: Partial<Record<PaymentType, number | null>> = {};
+        for (const type of PAYMENT_TYPES) values[type] = parseTenderDraft(drafts[type]);
+        return values;
+    }, [drafts]);
+
+    const resolution = useMemo(
+        () => resolveTender({ total, selected, typed, drivenBy }),
+        [total, selected, typed, drivenBy],
+    );
+
+    useEffect(() => {
+        if (!isOpen || selected.length < 2 || !selected.includes("cash")) return;
+        cashInputRef.current?.focus();
+    }, [isOpen, selected]);
 
     if (!isOpen) return null;
 
-    const paymentOptions: { type: PaymentType; icon: React.ReactNode; labelKey: string }[] = [
-        { type: "cash", icon: <CashIcon className="w-8 h-8" />, labelKey: "paymentTypes.cash" },
-        { type: "card", icon: <CardIcon className="w-8 h-8" />, labelKey: "paymentTypes.card" },
-        { type: "transfer", icon: <TransferIcon className="w-8 h-8" />, labelKey: "paymentTypes.transfer" },
-    ];
+    const split = selected.length > 1;
+    const showError = split && resolution.error && resolution.error !== "incomplete"
+        ? resolution.error
+        : split && resolution.error === "incomplete" && selected.some((type) => drafts[type])
+            ? "incomplete"
+            : null;
+
+    const toggle = (type: PaymentType) => {
+        const has = selected.includes(type);
+        if (has && selected.length === 1) return;
+        const next = has
+            ? selected.filter((item) => item !== type)
+            : PAYMENT_TYPES.filter((item) => item === type || selected.includes(item));
+
+        if (selected.length === 2 && next.length === 3) {
+            const frozen = { ...drafts };
+            for (const item of next) {
+                const amount = resolution.fields[item];
+                if (frozen[item] == null && amount != null && amount > 0) frozen[item] = String(amount);
+            }
+            setDrafts(frozen);
+            setDrivenBy(null);
+        } else if (next.length === 2) {
+            const driver = next.includes("cash") && parseTenderDraft(drafts.cash) != null
+                ? "cash"
+                : next.find((item) => parseTenderDraft(drafts[item]) != null) ?? null;
+            setDrivenBy(driver);
+        } else if (drivenBy && !next.includes(drivenBy)) {
+            setDrivenBy(null);
+        }
+
+        setSelected(next);
+    };
+
+    const shownValue = (type: PaymentType) => {
+        if (resolution.autoType === type) {
+            const amount = resolution.fields[type];
+            return amount == null ? "" : String(amount);
+        }
+        return drafts[type] ?? "";
+    };
 
     return (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div role="dialog" aria-modal="true" className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
             <div className="bg-white dark:bg-gray-dark rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
-                {/* Header */}
                 <div className="bg-green-600 text-white p-6 text-center">
                     <h2 className="text-xl font-bold">{t("checkout.selectPaymentType")}</h2>
-                    <p className="text-3xl font-bold mt-2">${total.toFixed(2)}</p>
+                    <p className="text-3xl font-bold mt-2">{formatMoney(total)}</p>
                 </div>
 
-                {/* Payment Options */}
                 <div className="p-6">
-                    <div className="grid grid-cols-3 gap-4 mb-6">
-                        {paymentOptions.map((option) => (
-                            <button
-                                key={option.type}
-                                onClick={() => setSelectedPayment(option.type)}
-                                disabled={isProcessing}
-                                className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${
-                                    selectedPayment === option.type
-                                        ? "border-green-600 bg-green-50 dark:bg-green-900/20 text-green-600"
-                                        : "border-gray-200 dark:border-dark-4 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-dark-3"
-                                } ${isProcessing ? "opacity-50 cursor-not-allowed" : ""}`}
-                            >
-                                {option.icon}
-                                <span className="mt-2 text-sm font-medium">{t(option.labelKey)}</span>
-                            </button>
-                        ))}
+                    <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">{t("checkout.splitHint")}</p>
+                    <div className="grid grid-cols-3 gap-4 mb-4">
+                        {PAYMENT_OPTIONS.map((option) => {
+                            const active = selected.includes(option.type);
+                            return (
+                                <button
+                                    type="button"
+                                    key={option.type}
+                                    aria-pressed={active}
+                                    onClick={() => toggle(option.type)}
+                                    disabled={isProcessing}
+                                    className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${FOCUS_BTN} ${
+                                        active
+                                            ? "border-green-600 bg-green-50 dark:bg-green-900/20 text-green-600"
+                                            : "border-gray-200 dark:border-dark-4 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-dark-3"
+                                    } ${isProcessing ? "opacity-50 cursor-not-allowed" : ""}`}
+                                >
+                                    <PaymentOptionIcon type={option.type} className="w-8 h-8" />
+                                    <span className="mt-2 text-sm font-medium">{t(option.labelKey)}</span>
+                                </button>
+                            );
+                        })}
                     </div>
 
-                    {/* Actions */}
+                    {split && (
+                        <div className="mb-4 space-y-3">
+                            {selected.map((type) => {
+                                const automatic = resolution.autoType === type;
+                                return (
+                                    <label key={type} className="block">
+                                        <span className="mb-1 flex items-center justify-between text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            <span>
+                                                {type === "cash" && !automatic
+                                                    ? t("checkout.cashReceived")
+                                                    : t(`paymentTypes.${type}`)}
+                                            </span>
+                                            {automatic && (
+                                                <span className="text-xs font-normal text-green-600">
+                                                    {t("checkout.completesAutomatically")}
+                                                </span>
+                                            )}
+                                        </span>
+                                        <input
+                                            ref={type === "cash" ? cashInputRef : undefined}
+                                            inputMode="numeric"
+                                            value={shownValue(type)}
+                                            disabled={isProcessing}
+                                            onChange={(event) => {
+                                                const digits = event.target.value.replace(/\D/g, "");
+                                                setDrivenBy(type);
+                                                setDrafts((current) => ({ ...current, [type]: digits }));
+                                            }}
+                                            className={`w-full rounded-xl border px-4 py-3 text-lg font-semibold outline-none focus:border-green-600 dark:bg-dark-2 dark:text-white ${
+                                                automatic
+                                                    ? "border-green-300 bg-green-50 dark:border-green-800 dark:bg-green-900/10"
+                                                    : "border-gray-200 dark:border-dark-4"
+                                            }`}
+                                        />
+                                    </label>
+                                );
+                            })}
+                            <div className="flex items-center justify-between text-sm">
+                                <span className="text-gray-500 dark:text-gray-400">{t("checkout.remaining")}</span>
+                                <span className={resolution.remaining === 0 ? "font-semibold text-green-600" : "font-semibold text-amber-600"}>
+                                    {formatMoney(resolution.remaining)}
+                                </span>
+                            </div>
+                            {showError === "over" && (
+                                <p className="text-sm text-red-600">{t("checkout.amountTooHigh")}</p>
+                            )}
+                            {showError === "mismatch" && (
+                                <p className="text-sm text-red-600">{t("checkout.amountsMustMatch")}</p>
+                            )}
+                            {showError === "incomplete" && (
+                                <p className="text-sm text-red-600">{t("checkout.needAmount")}</p>
+                            )}
+                        </div>
+                    )}
+
                     <div className="flex gap-3">
                         <button
+                            type="button"
                             onClick={onClose}
                             disabled={isProcessing}
-                            className="flex-1 py-3 bg-gray-200 dark:bg-dark-3 text-gray-700 dark:text-dark-6 rounded-xl hover:bg-gray-300 dark:hover:bg-dark-4 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                            className={`flex-1 py-3 bg-gray-200 dark:bg-dark-3 text-gray-700 dark:text-dark-6 rounded-xl hover:bg-gray-300 dark:hover:bg-dark-4 transition disabled:opacity-50 disabled:cursor-not-allowed ${FOCUS_BTN}`}
                         >
                             {t("common.cancel")}
                         </button>
                         <button
-                            onClick={() => onConfirm(selectedPayment)}
-                            disabled={isProcessing}
-                            className="flex-1 py-3 bg-green-600 text-white rounded-xl hover:bg-green-500 transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                            type="button"
+                            onClick={() => onConfirm(resolution.lines)}
+                            disabled={isProcessing || !resolution.ready}
+                            className={`flex-1 py-3 bg-green-600 text-white rounded-xl hover:bg-green-500 transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${FOCUS_BTN}`}
                         >
                             {isProcessing ? (
                                 <>
@@ -289,12 +432,12 @@ interface ReceiptModalProps {
     tax: number;
     total: number;
     orderNumber: string;
-    paymentType: PaymentType;
+    payments: TenderLine[];
     transferStatus?: "pending" | "validated" | null;
     t: (key: string, params?: Record<string, string | number>) => string;
 }
 
-function ReceiptModal({ isOpen, onClose, onNewSale, items, subtotal, tax, total, orderNumber, paymentType, transferStatus, t }: ReceiptModalProps) {
+function ReceiptModal({ isOpen, onClose, onNewSale, items, subtotal, tax, total, orderNumber, payments, transferStatus, t }: ReceiptModalProps) {
     const receiptRef = useRef<HTMLDivElement>(null);
 
     const handlePrint = () => {
@@ -360,7 +503,7 @@ function ReceiptModal({ isOpen, onClose, onNewSale, items, subtotal, tax, total,
     const currentDate = new Date().toLocaleString();
 
     return (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div role="dialog" aria-modal="true" className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
             <div className="bg-white dark:bg-gray-dark rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-hidden flex flex-col">
                 {/* Success Header */}
                 <div className="bg-green-600 text-white p-6 text-center">
@@ -387,10 +530,20 @@ function ReceiptModal({ isOpen, onClose, onNewSale, items, subtotal, tax, total,
                             <p className="text-sm text-gray-600 dark:text-gray-400">
                                 <span className="font-medium">{t("checkout.date")}:</span> {currentDate}
                             </p>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                                <span className="font-medium">{t("checkout.paymentMethod")}:</span> {t(`paymentTypes.${paymentType}`)}
-                            </p>
-                            {paymentType === "transfer" && (
+                            {payments.length === 1 ? (
+                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                    <span className="font-medium">{t("checkout.paymentMethod")}:</span>{" "}
+                                    {t(`paymentTypes.${payments[0].type}`)}
+                                </p>
+                            ) : (
+                                payments.map((payment) => (
+                                    <p key={payment.type} className="text-sm text-gray-600 dark:text-gray-400">
+                                        <span className="font-medium">{t(`paymentTypes.${payment.type}`)}:</span>{" "}
+                                        {formatMoney(payment.amount)}
+                                    </p>
+                                ))
+                            )}
+                            {payments.some((payment) => payment.type === "transfer") && (
                                 <p className="text-sm text-gray-600 dark:text-gray-400">
                                     <span className="font-medium">{t("purchases.validation")}:</span>{" "}
                                     {t(transferStatus === "validated" ? "purchases.validated" : "purchases.pending")}
@@ -407,13 +560,13 @@ function ReceiptModal({ isOpen, onClose, onNewSale, items, subtotal, tax, total,
                                         <p className="item-name font-medium text-gray-800 dark:text-white">{item.name}</p>
                                         <p className="item-qty text-xs text-gray-500 dark:text-gray-400">
                                             {isWeightBasedUnit(item.saleUnit) && item.weight !== undefined
-                                                ? `${item.weight.toFixed(2)} ${item.saleUnit} × $${item.price.toFixed(2)}${getSaleUnitSuffix(item.saleUnit)}`
-                                                : `${item.qty} × $${item.price.toFixed(2)}${getSaleUnitSuffix(item.saleUnit)}`
+                                                ? `${item.weight.toFixed(2)} ${item.saleUnit} × ${formatMoney(item.price)}${getSaleUnitSuffix(item.saleUnit)}`
+                                                : `${item.qty} × ${formatMoney(item.price)}${getSaleUnitSuffix(item.saleUnit)}`
                                             }
                                         </p>
                                     </div>
                                     <p className="item-price font-semibold text-gray-800 dark:text-white">
-                                        ${calculateItemTotal(item).toFixed(2)}
+                                        {formatMoney(calculateItemTotal(item))}
                                     </p>
                                 </div>
                             ))}
@@ -423,15 +576,15 @@ function ReceiptModal({ isOpen, onClose, onNewSale, items, subtotal, tax, total,
                         <div className="totals border-t-2 border-dashed border-gray-300 dark:border-dark-4 pt-4">
                             <div className="total-row flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-2">
                                 <span>{t("checkout.subtotal")}</span>
-                                <span>${subtotal.toFixed(2)}</span>
+                                <span>{formatMoney(subtotal)}</span>
                             </div>
                             <div className="total-row flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-2">
                                 <span>{t("checkout.tax")} (0%)</span>
-                                <span>${tax.toFixed(2)}</span>
+                                <span>{formatMoney(tax)}</span>
                             </div>
                             <div className="total-row final flex justify-between text-lg font-bold text-gray-800 dark:text-white border-t border-gray-300 dark:border-dark-4 pt-3 mt-2">
                                 <span>{t("checkout.total")}</span>
-                                <span className="text-green-600">${total.toFixed(2)}</span>
+                                <span className="text-green-600">{formatMoney(total)}</span>
                             </div>
                         </div>
 
@@ -445,15 +598,17 @@ function ReceiptModal({ isOpen, onClose, onNewSale, items, subtotal, tax, total,
                 {/* Actions */}
                 <div className="p-6 border-t dark:border-dark-4 bg-gray-50 dark:bg-dark-2 flex gap-3">
                     <button
+                        type="button"
                         onClick={handlePrint}
-                        className="flex-1 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-500 transition flex items-center justify-center gap-2"
+                        className={`flex-1 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-500 transition flex items-center justify-center gap-2 ${FOCUS_BTN}`}
                     >
                         <PrinterIcon className="w-5 h-5" />
                         {t("checkout.print")}
                     </button>
                     <button
+                        type="button"
                         onClick={onNewSale}
-                        className="flex-1 py-3 bg-green-600 text-white rounded-xl hover:bg-green-500 transition"
+                        className={`flex-1 py-3 bg-green-600 text-white rounded-xl hover:bg-green-500 transition ${FOCUS_BTN}`}
                     >
                         {t("checkout.newSale")}
                     </button>
@@ -487,6 +642,9 @@ export default function CartSummary() {
     const { weight, setWeight, isConnected, simulateScaleReading } = useScaleWeight();
     const [manualWeight, setManualWeight] = useState<string>("");
     const { t } = useTranslation();
+    const checkoutButtonRef = useRef<HTMLButtonElement>(null);
+    const addWeightButtonRef = useRef<HTMLButtonElement>(null);
+    const manualWeightInputRef = useRef<HTMLInputElement>(null);
     
     // Checkout state
     const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -499,17 +657,17 @@ export default function CartSummary() {
         tax: number;
         total: number;
         orderNumber: string;
-        paymentType: PaymentType;
+        payments: TenderLine[];
         transferStatus?: "pending" | "validated" | null;
     } | null>(null);
 
     // Use manual input or scale weight
     const currentWeight = manualWeight ? parseFloat(manualWeight) : weight;
 
-    const subtotal = cart.reduce((sum, item) => sum + calculateItemTotal(item), 0);
+    const subtotal = roundMoney(cart.reduce((sum, item) => sum + calculateItemTotal(item), 0));
     const taxRate = 0; // 0% tax - can be configured
-    const tax = subtotal * taxRate;
-    const total = subtotal + tax;
+    const tax = roundMoney(subtotal * taxRate);
+    const total = roundMoney(subtotal + tax);
 
     const handleConfirmWeight = () => {
         if (pendingWeightProduct && currentWeight > 0) {
@@ -517,6 +675,7 @@ export default function CartSummary() {
             setPendingWeightProduct(null);
             setManualWeight("");
             setWeight(0);
+            requestAnimationFrame(() => checkoutButtonRef.current?.focus());
         }
     };
 
@@ -524,27 +683,50 @@ export default function CartSummary() {
         setPendingWeightProduct(null);
         setManualWeight("");
         setWeight(0);
+        requestAnimationFrame(() =>
+            document.querySelector<HTMLButtonElement>("[data-product-item]")?.focus(),
+        );
     };
+
+    // Weight product selected: read the scale and focus "Add to cart" so a
+    // second Enter confirms it.
+    useEffect(() => {
+        if (!pendingWeightProduct) return;
+        if (isConnected && weight <= 0 && !manualWeight) simulateScaleReading();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [pendingWeightProduct]);
+
+    const canConfirmWeight = Boolean(pendingWeightProduct) && currentWeight > 0;
+
+    useEffect(() => {
+        if (!pendingWeightProduct) return;
+        // Don't pull focus away while the cashier is typing a manual weight.
+        if (document.activeElement === manualWeightInputRef.current) return;
+        if (canConfirmWeight) {
+            addWeightButtonRef.current?.focus();
+        } else {
+            manualWeightInputRef.current?.focus();
+        }
+    }, [pendingWeightProduct, canConfirmWeight]);
 
     const handleCheckout = () => {
         if (cart.length === 0) return;
         setShowPaymentModal(true);
     };
 
-    const handleConfirmPayment = async (paymentType: PaymentType) => {
-        if (cart.length === 0) return;
+    const handleConfirmPayment = async (payments: TenderLine[]) => {
+        if (cart.length === 0 || payments.length === 0) return;
         
         setIsProcessing(true);
         const orderNumber = generateOrderNumber();
 
         try {
-            // Prepare purchase data
             const purchaseData = {
                 orderNumber,
                 subtotal,
                 tax,
                 total,
-                paymentType,
+                payments,
                 details: cart.map((item) => ({
                     productId: item.id,
                     productName: item.name,
@@ -566,37 +748,35 @@ export default function CartSummary() {
             });
 
             if (!response.ok) {
-                throw new Error("Failed to save purchase");
+                const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+                throw new Error(payload?.error ?? "Failed to save purchase");
             }
 
-            const saved = (await response.json()) as { transferStatus?: "pending" | "validated" | null };
+            const saved = (await response.json()) as {
+                total: number;
+                paymentType: PaymentType;
+                cashAmount?: number | null;
+                cardAmount?: number | null;
+                transferAmount?: number | null;
+                transferStatus?: "pending" | "validated" | null;
+            };
 
-            // Create the completed order snapshot
             setCompletedOrder({
                 items: [...cart],
                 subtotal,
                 tax,
                 total,
                 orderNumber,
-                paymentType,
-                transferStatus: saved.transferStatus ?? (paymentType === "transfer" ? "pending" : null),
+                payments: paymentShares(saved),
+                transferStatus: saved.transferStatus ?? (payments.some((payment) => payment.type === "transfer") ? "pending" : null),
             });
 
             setShowPaymentModal(false);
             setShowReceipt(true);
         } catch (error) {
             console.error("Error saving purchase:", error);
-            // Still show receipt even if save fails (offline mode)
-            setCompletedOrder({
-                items: [...cart],
-                subtotal,
-                tax,
-                total,
-                orderNumber,
-                paymentType,
-            });
-            setShowPaymentModal(false);
-            setShowReceipt(true);
+            const message = error instanceof Error ? error.message : t("checkout.saveFailed");
+            window.alert(message);
         } finally {
             setIsProcessing(false);
         }
@@ -618,7 +798,7 @@ export default function CartSummary() {
     };
 
     return (
-        <div className="bg-white dark:bg-gray-dark rounded-2xl shadow-lg flex flex-col h-full overflow-hidden">
+        <div data-cart-panel className="bg-white dark:bg-gray-dark rounded-2xl shadow-lg flex flex-col h-full overflow-hidden">
             {/* Scrollable Content Area */}
             <div className="flex-1 overflow-y-auto min-h-0 p-6 pb-0">
                 <h2 className="text-lg font-semibold mb-4 text-green-600">{t("cart.title")}</h2>
@@ -651,17 +831,29 @@ export default function CartSummary() {
                     {/* Manual Input */}
                     <div className="flex gap-2 mb-2">
                         <input
+                            ref={manualWeightInputRef}
                             type="number"
                             step="0.01"
                             min="0"
                             placeholder={t("cart.manualWeight")}
                             value={manualWeight}
                             onChange={(e) => setManualWeight(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter" && pendingWeightProduct) {
+                                    e.preventDefault();
+                                    handleConfirmWeight();
+                                }
+                                if (e.key === "Escape" && pendingWeightProduct) {
+                                    e.preventDefault();
+                                    handleCancelWeight();
+                                }
+                            }}
                             className="flex-1 px-3 py-2 text-sm rounded-lg border dark:bg-dark-2 dark:border-dark-4 dark:text-dark-6 focus:outline-none focus:ring-2 focus:ring-green-500"
                         />
                         <button
+                            type="button"
                             onClick={simulateScaleReading}
-                            className="px-3 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition"
+                            className={`px-3 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition ${FOCUS_BTN}`}
                             title={t("cart.read")}
                         >
                             {t("cart.read")}
@@ -675,24 +867,33 @@ export default function CartSummary() {
                                 <span className="font-medium">{t("cart.weighing")}:</span> {pendingWeightProduct.name}
                             </p>
                             <p className="text-xs text-yellow-600 dark:text-yellow-300 mb-3">
-                                ${pendingWeightProduct.price.toFixed(2)}{getSaleUnitSuffix(pendingWeightProduct.saleUnit)}
+                                {formatMoney(pendingWeightProduct.price)}{getSaleUnitSuffix(pendingWeightProduct.saleUnit)}
                                 {currentWeight > 0 && (
                                     <span className="ml-2">
-                                        = ${(pendingWeightProduct.price * currentWeight).toFixed(2)}
+                                        = {formatMoney(pendingWeightProduct.price * currentWeight)}
                                     </span>
                                 )}
                             </p>
                             <div className="flex gap-2">
                                 <button
+                                    ref={addWeightButtonRef}
+                                    type="button"
                                     onClick={handleConfirmWeight}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Escape") {
+                                            e.preventDefault();
+                                            handleCancelWeight();
+                                        }
+                                    }}
                                     disabled={currentWeight <= 0}
-                                    className="flex-1 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-500 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className={`flex-1 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-500 transition disabled:opacity-50 disabled:cursor-not-allowed ${FOCUS_BTN}`}
                                 >
                                     {t("common.addToCart")}
                                 </button>
                                 <button
+                                    type="button"
                                     onClick={handleCancelWeight}
-                                    className="px-4 py-2 text-sm bg-gray-300 dark:bg-dark-4 text-gray-700 dark:text-dark-6 rounded-lg hover:bg-gray-400 dark:hover:bg-dark-5 transition"
+                                    className={`px-4 py-2 text-sm bg-gray-300 dark:bg-dark-4 text-gray-700 dark:text-dark-6 rounded-lg hover:bg-gray-400 dark:hover:bg-dark-5 transition ${FOCUS_BTN}`}
                                 >
                                     {t("common.cancel")}
                                 </button>
@@ -715,20 +916,22 @@ export default function CartSummary() {
                                     <p className="font-medium text-green-600">{item.name}</p>
                                     <p className="text-sm text-gray-500 dark:text-dark-5">
                                         {isWeightBasedUnit(item.saleUnit) && item.weight !== undefined ? (
-                                            <>{item.weight.toFixed(2)} {item.saleUnit} × ${item.price.toFixed(2)}{getSaleUnitSuffix(item.saleUnit)}</>
+                                            <>{item.weight.toFixed(2)} {item.saleUnit} × {formatMoney(item.price)}{getSaleUnitSuffix(item.saleUnit)}</>
                                         ) : (
-                                            <>{item.qty} × ${item.price.toFixed(2)}{getSaleUnitSuffix(item.saleUnit)}</>
+                                            <>{item.qty} × {formatMoney(item.price)}{getSaleUnitSuffix(item.saleUnit)}</>
                                         )}
                                     </p>
                                 </div>
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-3">
                                     <p className="font-semibold text-green-600">
-                                        ${calculateItemTotal(item).toFixed(2)}
+                                        {formatMoney(calculateItemTotal(item))}
                                     </p>
                                     <button
+                                        type="button"
                                         onClick={() => removeFromCart(item.id)}
-                                        className="px-2 py-1 text-xs bg-red-500 text-white rounded-lg hover:bg-red-400"
+                                        className="flex h-11 min-w-11 items-center justify-center rounded-lg bg-red-500 px-3 text-lg font-bold text-white transition-colors hover:bg-red-400 focus-visible:bg-red-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-red-300 dark:focus-visible:ring-red-500/60"
                                         title={t("cart.remove")}
+                                        aria-label={t("cart.remove")}
                                     >
                                         −
                                     </button>
@@ -745,39 +948,44 @@ export default function CartSummary() {
                 <div className="space-y-2 mb-4">
                     <div className="flex justify-between text-sm text-gray-500 dark:text-dark-5">
                         <span>{t("checkout.subtotal")}</span>
-                        <span>${subtotal.toFixed(2)}</span>
+                        <span>{formatMoney(subtotal)}</span>
                     </div>
                     {taxRate > 0 && (
                         <div className="flex justify-between text-sm text-gray-500 dark:text-dark-5">
                             <span>{t("checkout.tax")} ({(taxRate * 100).toFixed(0)}%)</span>
-                            <span>${tax.toFixed(2)}</span>
+                            <span>{formatMoney(tax)}</span>
                         </div>
                     )}
                     <div className="flex justify-between text-gray-700 dark:text-dark-6 font-medium pt-2 border-t dark:border-dark-4">
                         <span className="font-semibold">{t("common.total")}</span>
-                        <span className="text-green-600 font-bold text-lg">${total.toFixed(2)}</span>
+                        <span className="text-green-600 font-bold text-lg">{formatMoney(total)}</span>
                     </div>
                 </div>
                 <div className="space-y-2">
                     <button 
+                        ref={checkoutButtonRef}
+                        data-checkout-button
+                        type="button"
                         onClick={handleCheckout}
                         disabled={cart.length === 0}
-                        className="w-full py-4 text-lg font-semibold bg-green-600 text-white rounded-xl hover:bg-green-500 transition shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                        className={`w-full py-4 text-lg font-semibold bg-green-600 text-white rounded-xl hover:bg-green-500 transition shadow-md disabled:opacity-50 disabled:cursor-not-allowed ${FOCUS_BTN}`}
                     >
                         {t("common.checkout")}
                     </button>
                     <div className="flex gap-2">
                         <button
+                            type="button"
                             onClick={saveCart}
                             disabled={cart.length === 0}
-                            className="flex-1 py-2.5 text-sm bg-blue-600 text-white rounded-xl hover:bg-blue-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                            className={`flex-1 py-2.5 text-sm bg-blue-600 text-white rounded-xl hover:bg-blue-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${FOCUS_BTN}`}
                         >
                             <BookmarkIcon className="w-4 h-4" />
                             {t("cart.saveCart")}
                         </button>
                         <button
+                            type="button"
                             onClick={() => setShowSavedCarts(true)}
-                            className="flex-1 py-2.5 text-sm bg-gray-200 dark:bg-dark-3 text-gray-700 dark:text-dark-6 rounded-xl hover:bg-gray-300 dark:hover:bg-dark-4 transition flex items-center justify-center gap-2 relative"
+                            className={`flex-1 py-2.5 text-sm bg-gray-200 dark:bg-dark-3 text-gray-700 dark:text-dark-6 rounded-xl hover:bg-gray-300 dark:hover:bg-dark-4 transition flex items-center justify-center gap-2 relative ${FOCUS_BTN}`}
                         >
                             <FolderIcon className="w-4 h-4" />
                             {t("cart.savedCarts")}
@@ -788,9 +996,10 @@ export default function CartSummary() {
                             )}
                         </button>
                         <button
+                            type="button"
                             onClick={clearCart}
                             disabled={cart.length === 0}
-                            className="px-4 py-2.5 text-sm bg-gray-200 dark:bg-dark-3 text-gray-700 dark:text-dark-6 rounded-xl hover:bg-gray-300 dark:hover:bg-dark-4 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                            className={`px-4 py-2.5 text-sm bg-gray-200 dark:bg-dark-3 text-gray-700 dark:text-dark-6 rounded-xl hover:bg-gray-300 dark:hover:bg-dark-4 transition disabled:opacity-50 disabled:cursor-not-allowed ${FOCUS_BTN}`}
                         >
                             {t("common.clear")}
                         </button>
@@ -829,7 +1038,7 @@ export default function CartSummary() {
                     tax={completedOrder.tax}
                     total={completedOrder.total}
                     orderNumber={completedOrder.orderNumber}
-                    paymentType={completedOrder.paymentType}
+                    payments={completedOrder.payments}
                     transferStatus={completedOrder.transferStatus}
                     t={t}
                 />

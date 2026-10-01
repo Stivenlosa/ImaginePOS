@@ -15,7 +15,10 @@ export const NAV_DATA = [
       {
         titleKey: "navigation.products",
         icon: Icons.FourCircle,
-        items: [] as { titleKey: string; url: string }[],
+        items: [
+          { titleKey: "navigation.manageProducts", url: "/products" },
+          { titleKey: "navigation.manageBarcodes", url: "/products/barcodes" },
+        ],
         url: "/products",
       },
       {
@@ -23,6 +26,13 @@ export const NAV_DATA = [
         icon: Icons.PieChart,
         items: [] as { titleKey: string; url: string }[],
         url: "/reports",
+      },
+      {
+        titleKey: "navigation.registers",
+        icon: Icons.Table,
+        items: [] as { titleKey: string; url: string }[],
+        url: "/registers",
+        roles: ["administrador"],
       },
       {
         titleKey: "navigation.settings",

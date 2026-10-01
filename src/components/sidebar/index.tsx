@@ -12,13 +12,14 @@ import {useSidebarContext} from "./sidebar-context";
 import {useTranslation} from "@/i18n";
 import {useAuth} from "@/components/auth/auth-context";
 import type {UserRole} from "@/types/user";
+import {LogOutIcon} from "@/components/header/user-info/icons";
 
 export function Sidebar() {
     const pathname = usePathname();
     const {setIsOpen, isOpen, isMobile, toggleSidebar} = useSidebarContext();
     const [expandedItems, setExpandedItems] = useState<string[]>([]);
     const {t} = useTranslation();
-    const {user} = useAuth();
+    const {user, logout} = useAuth();
     const role = user?.role;
 
     const sections = NAV_DATA.map((section) => ({
@@ -39,16 +40,14 @@ export function Sidebar() {
     };
 
     useEffect(() => {
-        // Keep collapsible open, when it's subpage is active
+        // Keep collapsible open when a subpage is active
         NAV_DATA.some((section) => {
             return section.items.some((item) => {
                 return item.items.some((subItem) => {
-                    if (subItem.url === pathname) {
+                    if (pathname === subItem.url || pathname.startsWith(`${subItem.url}/`)) {
                         if (!expandedItems.includes(item.titleKey)) {
                             toggleExpanded(item.titleKey);
                         }
-
-                        // Break the loop
                         return true;
                     }
                 });
@@ -134,7 +133,9 @@ export function Sidebar() {
                                                     <div>
                                                         <MenuItem
                                                             isActive={item.items.some(
-                                                                ({url}) => url === pathname,
+                                                                ({url}) =>
+                                                                    pathname === url ||
+                                                                    pathname.startsWith(`${url}/`),
                                                             )}
                                                             onClick={() => toggleExpanded(item.titleKey)}
                                                         >
@@ -196,6 +197,22 @@ export function Sidebar() {
                             </div>
                         ))}
                     </div>
+
+                    {user && (
+                        <div className="mt-4 border-t border-gray-200 pr-3 pt-4 dark:border-gray-800">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    if (isMobile) toggleSidebar();
+                                    void logout();
+                                }}
+                                className="flex w-full items-center gap-3 rounded-lg px-3.5 py-3 font-medium text-red transition-colors hover:bg-red-light-6 dark:hover:bg-[#FFFFFF1A]"
+                            >
+                                <LogOutIcon className="size-6 shrink-0" aria-hidden="true"/>
+                                <span>{t("userInfo.logOut")}</span>
+                            </button>
+                        </div>
+                    )}
                 </div>
             </aside>
         </>

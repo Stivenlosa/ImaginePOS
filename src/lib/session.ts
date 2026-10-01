@@ -1,17 +1,11 @@
+import { authSecret } from "@/lib/session-auth";
 import type { SessionUser, UserRole } from "@/types/user";
 
 export const SESSION_COOKIE = "imagine_session";
+export const RESUME_COOKIE = "imagine_resume_at";
 const SESSION_MAX_AGE_SECONDS = 60 * 60 * 12;
 
 const ROLES = new Set<UserRole>(["administrador", "cajero"]);
-
-function authSecret() {
-  const secret = process.env.AUTH_SECRET;
-  if (!secret) {
-    throw new Error("AUTH_SECRET environment variable is not set");
-  }
-  return secret;
-}
 
 function toBase64Url(bytes: Uint8Array) {
   let binary = "";
@@ -99,12 +93,16 @@ export async function verifySessionToken(token: string | undefined | null): Prom
   }
 }
 
-export function sessionCookieOptions() {
+/**
+ * A session cookie (no maxAge) is dropped when the browser session ends.
+ * Pass maxAgeSeconds to override: 0 clears it, a few seconds arms a close.
+ */
+export function sessionCookieOptions(maxAgeSeconds?: number) {
   return {
     httpOnly: true,
     sameSite: "lax" as const,
     secure: process.env.NODE_ENV === "production",
     path: "/",
-    maxAge: SESSION_MAX_AGE_SECONDS,
+    ...(maxAgeSeconds === undefined ? {} : { maxAge: maxAgeSeconds }),
   };
 }

@@ -6,6 +6,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatMoney } from "@/lib/money";
 import Image from "next/image";
 import { getTopProducts } from "../fetch";
 
@@ -55,12 +56,12 @@ export async function TopProducts() {
 
               <TableCell>{product.category}</TableCell>
 
-              <TableCell>${product.price}</TableCell>
+              <TableCell>{formatMoney(product.price)}</TableCell>
 
               <TableCell>{product.sold}</TableCell>
 
               <TableCell className="pr-5 text-right text-green-light-1 sm:pr-6 xl:pr-7.5">
-                ${product.profit}
+                {formatMoney(product.profit)}
               </TableCell>
             </TableRow>
           ))}

@@ -1,5 +1,6 @@
 import "temporal-polyfill/full/global";
 import "temporal-polyfill/types/global";
+import { moneyEquals, parseMoney } from "@/lib/money";
 
 /** Bank messages use Colombian local time (llaves / Bre-B). */
 export const STORE_TIME_ZONE = "America/Bogota";
@@ -22,23 +23,7 @@ export function normalizeLlave(value: string): string {
 }
 
 export function parseAmount(raw: string): number | null {
-  const cleaned = raw.trim();
-  let normalized = cleaned;
-
-  if (cleaned.includes(",") && cleaned.includes(".")) {
-    if (cleaned.lastIndexOf(",") > cleaned.lastIndexOf(".")) {
-      normalized = cleaned.replace(/\./g, "").replace(",", ".");
-    } else {
-      normalized = cleaned.replace(/,/g, "");
-    }
-  } else if (cleaned.includes(",")) {
-    const [whole, fraction] = cleaned.split(",");
-    normalized = fraction && fraction.length <= 2 ? `${whole}.${fraction}` : cleaned.replace(/,/g, "");
-  }
-
-  const amount = Number(normalized);
-  if (!Number.isFinite(amount)) return null;
-  return Math.round(amount * 100) / 100;
+  return parseMoney(raw);
 }
 
 export function parseTransferMessages(text: string): ParsedTransfer[] {
@@ -106,5 +91,5 @@ export function withinMinutes(a: Date, b: Date, minutes: number): boolean {
 }
 
 export function amountsMatch(left: number, right: number): boolean {
-  return Math.abs(left - right) < 0.009;
+  return moneyEquals(left, right);
 }

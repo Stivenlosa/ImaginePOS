@@ -1,11 +1,13 @@
 import { WeeksProfit } from "@/components/charts/weeks-profit"
 import { PaymentsOverview } from "@/components/charts/payments-overview/index"
 import { BankTransferTable } from "@/components/tables/bank-transfer-table";
+import { DayCloseHistory } from "@/components/tables/day-close-history";
 import { InvoiceTable } from "@/components/tables/invoice-table";
 import { Metadata } from "next"
 import { listBankTransfers } from "@/lib/bank-transfer-store";
 import { getActiveUser } from "@/lib/current-user";
-import { getPaymentsOverviewData, getWeeksProfitData } from "@/services/charts.services";
+import { cn } from "@/lib/utils";
+import { getPaymentsOverviewData, getWeeksProfitData, listPaymentYears } from "@/services/charts.services";
 import { getInvoiceTableData } from "@/components/tables/fetch";
 
 export const metadata: Metadata = {
@@ -15,6 +17,7 @@ export const metadata: Metadata = {
 export default async function Page() {
   // Fetch all data sequentially to avoid overwhelming the DB connection pool
   const paymentsData = await getPaymentsOverviewData();
+  const paymentYears = await listPaymentYears();
   const weeksProfitData = await getWeeksProfitData();
   const invoiceData = await getInvoiceTableData();
   const user = await getActiveUser();
@@ -27,6 +30,7 @@ export default async function Page() {
         <PaymentsOverview
           className="col-span-12 xl:col-span-7"
           data={paymentsData}
+          years={paymentYears}
         />
 
         <WeeksProfit
@@ -34,12 +38,16 @@ export default async function Page() {
           data={weeksProfitData}
         />
 
-        {user?.role === "administrador" && <BankTransferTable transfers={bankTransfers} />}
-
         <InvoiceTable
-          className="col-span-12"
+          className={cn("col-span-12", user?.role === "administrador" && "xl:col-span-7")}
           purchases={invoiceData}
         />
+
+        {user?.role === "administrador" && (
+          <BankTransferTable className="col-span-12 xl:col-span-5" transfers={bankTransfers} />
+        )}
+
+        <DayCloseHistory className="col-span-12" />
       </div>
     </>
   )

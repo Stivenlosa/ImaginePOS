@@ -25,7 +25,8 @@
   export function announcePayment(name, amount) {
       if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
   
-      const text = `Pago recibido de ${name} por ${amount} pesos`;
+      const pesos = Math.round(Number(amount));
+      const text = `Pago recibido de ${name} por ${Number.isFinite(pesos) ? pesos : amount} pesos`;
       const utterance = new SpeechSynthesisUtterance(text);
   
       utterance.lang = "es-CO"; // change to "es-MX" / "es-ES" if you prefer

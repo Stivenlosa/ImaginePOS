@@ -2,6 +2,7 @@
 import { createContext, useContext, useState, ReactNode } from "react";
 import type { Product, CartItem } from "@/types/product";
 import { isWeightBasedUnit, calculateItemTotal } from "@/types/product";
+import { recordProductUse } from "@/lib/product-usage";
 
 export type SavedCart = {
     id: string;
@@ -46,6 +47,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
             setPendingWeightProduct(product);
             return;
         }
+
+        recordProductUse(product.id);
 
         setCart((prev) => {
             const existing = prev.find((item) => item.id === product.id);

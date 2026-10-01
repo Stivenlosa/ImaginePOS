@@ -1,3 +1,5 @@
+import { roundMoney } from "@/lib/money";
+
 // Sale unit types for products
 export const SALE_UNITS = {
     unit: { label: "Unit", suffix: "ea", isWeightBased: false },
@@ -17,6 +19,7 @@ export type PaymentType = (typeof PAYMENT_TYPES)[number];
 
 export type Product = {
     id: number;
+    code: string;
     name: string;
     price: number;
     image?: string | null;
@@ -43,10 +46,20 @@ export function isWeightBasedUnit(unit: SaleUnit): boolean {
     return SALE_UNITS[unit].isWeightBased;
 }
 
+export function moneyLineTotal(
+    price: number,
+    quantity: number,
+    saleUnit: SaleUnit,
+    weight?: number | null,
+): number {
+    const unitPrice = roundMoney(price);
+    if (isWeightBasedUnit(saleUnit) && weight != null) {
+        return roundMoney(unitPrice * weight);
+    }
+    return unitPrice * quantity;
+}
+
 // Calculate item total based on unit type
 export function calculateItemTotal(item: CartItem): number {
-    if (isWeightBasedUnit(item.saleUnit) && item.weight !== undefined) {
-        return item.price * item.weight;
-    }
-    return item.price * item.qty;
+    return moneyLineTotal(item.price, item.qty, item.saleUnit, item.weight);
 }

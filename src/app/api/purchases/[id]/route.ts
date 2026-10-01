@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/current-user";
+import { hasTransferPayment } from "@/lib/payment-split";
 import { nowTimestamp, timestampToIso } from "@/prisma/dates";
 import { db } from "@/prisma/db";
 
@@ -26,7 +27,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
   if (!purchase) {
     return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
-  if (purchase.paymentType !== "transfer") {
+  if (!hasTransferPayment(purchase)) {
     return NextResponse.json({ error: "not_transfer" }, { status: 400 });
   }
 

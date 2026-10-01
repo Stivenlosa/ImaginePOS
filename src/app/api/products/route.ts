@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { nowTimestamp } from "@/prisma/dates";
+import { createProductWithCode } from "@/lib/product-create";
 import { db } from "@/prisma/db";
 import type { SaleUnit } from "@/types/product";
 
@@ -24,24 +24,32 @@ export async function GET() {
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { name, price, image, saleUnit } = body;
+        const { name, price, image, saleUnit, code } = body;
 
-        if (!name || price === undefined) {
+        const amount = typeof price === "number" ? price : parseFloat(price);
+        if (!name || price === undefined || !Number.isFinite(amount) || amount < 0) {
             return NextResponse.json(
                 { error: "Name and price are required" },
                 { status: 400 }
             );
         }
 
-        const product = await db.orm.public.Product.create({
+        const result = await createProductWithCode({
             name,
-            price: parseFloat(price),
+            price: amount,
             image: image || null,
             saleUnit: (saleUnit as SaleUnit) || "unit",
-            updatedAt: nowTimestamp(),
+            code,
         });
 
-        return NextResponse.json(product, { status: 201 });
+        if (!result.ok) {
+            return NextResponse.json(
+                { error: result.error },
+                { status: result.status },
+            );
+        }
+
+        return NextResponse.json(result.product, { status: 201 });
     } catch (error) {
         console.error("Error creating product:", error);
         return NextResponse.json(

@@ -34,7 +34,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'6bbed76b3cf3ca16e46af8c1f9c31951dfbf7937cff229750f08996927f0e95a'>;
+  StorageHashBase<'4fd753d9e97684222e2e688ca16887f970d94c2af1fb4fa4ff3ee4460f6c8990'>;
 export type ExecutionHash = ExecutionHashBase<string>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
@@ -268,7 +268,25 @@ export type FieldOutputTypes = {
       readonly payerName: CodecTypes['pg/text@1']['output'];
       readonly purchaseId: CodecTypes['pg/int4@1']['output'] | null;
     };
+    readonly BusinessDay: {
+      readonly businessDate: CodecTypes['pg/text@1']['output'];
+      readonly closedAt: CodecTypes['pg/timestamp-temporal@1']['output'] | null;
+      readonly closedByUserId: CodecTypes['pg/int4@1']['output'] | null;
+      readonly id: CodecTypes['pg/int4@1']['output'];
+      readonly openedAt: CodecTypes['pg/timestamp-temporal@1']['output'];
+      readonly openedByUserId: CodecTypes['pg/int4@1']['output'];
+      readonly purchaseCount: CodecTypes['pg/int4@1']['output'] | null;
+      readonly status: 'open' | 'closed';
+      readonly totalCard: CodecTypes['pg/float8@1']['output'] | null;
+      readonly totalCash: CodecTypes['pg/float8@1']['output'] | null;
+      readonly totalCashVariance: CodecTypes['pg/float8@1']['output'] | null;
+      readonly totalCountedCash: CodecTypes['pg/float8@1']['output'] | null;
+      readonly totalExpectedCash: CodecTypes['pg/float8@1']['output'] | null;
+      readonly totalSales: CodecTypes['pg/float8@1']['output'] | null;
+      readonly totalTransfer: CodecTypes['pg/float8@1']['output'] | null;
+    };
     readonly Product: {
+      readonly code: CodecTypes['pg/text@1']['output'];
       readonly createdAt: CodecTypes['pg/timestamp-temporal@1']['output'];
       readonly id: CodecTypes['pg/int4@1']['output'];
       readonly image: CodecTypes['pg/text@1']['output'] | null;
@@ -278,14 +296,19 @@ export type FieldOutputTypes = {
       readonly updatedAt: CodecTypes['pg/timestamp-temporal@1']['output'];
     };
     readonly Purchase: {
+      readonly cardAmount: CodecTypes['pg/float8@1']['output'];
+      readonly cashAmount: CodecTypes['pg/float8@1']['output'];
+      readonly cashierUserId: CodecTypes['pg/int4@1']['output'] | null;
       readonly createdAt: CodecTypes['pg/timestamp-temporal@1']['output'];
       readonly id: CodecTypes['pg/int4@1']['output'];
       readonly orderNumber: CodecTypes['pg/text@1']['output'];
       readonly payerName: CodecTypes['pg/text@1']['output'] | null;
       readonly paymentType: 'cash' | 'card' | 'transfer';
+      readonly registerSessionId: CodecTypes['pg/int4@1']['output'] | null;
       readonly subtotal: CodecTypes['pg/float8@1']['output'];
       readonly tax: CodecTypes['pg/float8@1']['output'];
       readonly total: CodecTypes['pg/float8@1']['output'];
+      readonly transferAmount: CodecTypes['pg/float8@1']['output'];
       readonly transferMessageId: CodecTypes['pg/text@1']['output'] | null;
       readonly transferStatus: 'pending' | 'validated' | null;
       readonly updatedAt: CodecTypes['pg/timestamp-temporal@1']['output'];
@@ -302,6 +325,34 @@ export type FieldOutputTypes = {
       readonly quantity: CodecTypes['pg/int4@1']['output'];
       readonly saleUnit: 'unit' | 'kg' | 'lb' | 'oz' | 'g' | 'liter' | 'ml';
       readonly weight: CodecTypes['pg/float8@1']['output'] | null;
+    };
+    readonly Register: {
+      readonly active: CodecTypes['pg/bool@1']['output'];
+      readonly createdAt: CodecTypes['pg/timestamp-temporal@1']['output'];
+      readonly id: CodecTypes['pg/int4@1']['output'];
+      readonly name: CodecTypes['pg/text@1']['output'] | null;
+      readonly number: CodecTypes['pg/int4@1']['output'];
+      readonly updatedAt: CodecTypes['pg/timestamp-temporal@1']['output'];
+    };
+    readonly RegisterSession: {
+      readonly businessDayId: CodecTypes['pg/int4@1']['output'];
+      readonly cardTotal: CodecTypes['pg/float8@1']['output'] | null;
+      readonly cashTotal: CodecTypes['pg/float8@1']['output'] | null;
+      readonly cashVariance: CodecTypes['pg/float8@1']['output'] | null;
+      readonly cashierUserId: CodecTypes['pg/int4@1']['output'];
+      readonly closedAt: CodecTypes['pg/timestamp-temporal@1']['output'] | null;
+      readonly closedByUserId: CodecTypes['pg/int4@1']['output'] | null;
+      readonly countedCash: CodecTypes['pg/float8@1']['output'] | null;
+      readonly expectedCash: CodecTypes['pg/float8@1']['output'] | null;
+      readonly id: CodecTypes['pg/int4@1']['output'];
+      readonly openedAt: CodecTypes['pg/timestamp-temporal@1']['output'];
+      readonly openedByUserId: CodecTypes['pg/int4@1']['output'];
+      readonly openingFloat: CodecTypes['pg/float8@1']['output'];
+      readonly purchaseCount: CodecTypes['pg/int4@1']['output'] | null;
+      readonly registerId: CodecTypes['pg/int4@1']['output'];
+      readonly status: 'open' | 'closed';
+      readonly totalSales: CodecTypes['pg/float8@1']['output'] | null;
+      readonly transferTotal: CodecTypes['pg/float8@1']['output'] | null;
     };
     readonly TransferConfig: {
       readonly gmailAddress: CodecTypes['pg/text@1']['output'];
@@ -344,7 +395,25 @@ export type FieldInputTypes = {
       readonly payerName: CodecTypes['pg/text@1']['input'];
       readonly purchaseId: CodecTypes['pg/int4@1']['input'] | null;
     };
+    readonly BusinessDay: {
+      readonly businessDate: CodecTypes['pg/text@1']['input'];
+      readonly closedAt: CodecTypes['pg/timestamp-temporal@1']['input'] | null;
+      readonly closedByUserId: CodecTypes['pg/int4@1']['input'] | null;
+      readonly id: CodecTypes['pg/int4@1']['input'];
+      readonly openedAt: CodecTypes['pg/timestamp-temporal@1']['input'];
+      readonly openedByUserId: CodecTypes['pg/int4@1']['input'];
+      readonly purchaseCount: CodecTypes['pg/int4@1']['input'] | null;
+      readonly status: 'open' | 'closed';
+      readonly totalCard: CodecTypes['pg/float8@1']['input'] | null;
+      readonly totalCash: CodecTypes['pg/float8@1']['input'] | null;
+      readonly totalCashVariance: CodecTypes['pg/float8@1']['input'] | null;
+      readonly totalCountedCash: CodecTypes['pg/float8@1']['input'] | null;
+      readonly totalExpectedCash: CodecTypes['pg/float8@1']['input'] | null;
+      readonly totalSales: CodecTypes['pg/float8@1']['input'] | null;
+      readonly totalTransfer: CodecTypes['pg/float8@1']['input'] | null;
+    };
     readonly Product: {
+      readonly code: CodecTypes['pg/text@1']['input'];
       readonly createdAt: CodecTypes['pg/timestamp-temporal@1']['input'];
       readonly id: CodecTypes['pg/int4@1']['input'];
       readonly image: CodecTypes['pg/text@1']['input'] | null;
@@ -354,14 +423,19 @@ export type FieldInputTypes = {
       readonly updatedAt: CodecTypes['pg/timestamp-temporal@1']['input'];
     };
     readonly Purchase: {
+      readonly cardAmount: CodecTypes['pg/float8@1']['input'];
+      readonly cashAmount: CodecTypes['pg/float8@1']['input'];
+      readonly cashierUserId: CodecTypes['pg/int4@1']['input'] | null;
       readonly createdAt: CodecTypes['pg/timestamp-temporal@1']['input'];
       readonly id: CodecTypes['pg/int4@1']['input'];
       readonly orderNumber: CodecTypes['pg/text@1']['input'];
       readonly payerName: CodecTypes['pg/text@1']['input'] | null;
       readonly paymentType: 'cash' | 'card' | 'transfer';
+      readonly registerSessionId: CodecTypes['pg/int4@1']['input'] | null;
       readonly subtotal: CodecTypes['pg/float8@1']['input'];
       readonly tax: CodecTypes['pg/float8@1']['input'];
       readonly total: CodecTypes['pg/float8@1']['input'];
+      readonly transferAmount: CodecTypes['pg/float8@1']['input'];
       readonly transferMessageId: CodecTypes['pg/text@1']['input'] | null;
       readonly transferStatus: 'pending' | 'validated' | null;
       readonly updatedAt: CodecTypes['pg/timestamp-temporal@1']['input'];
@@ -378,6 +452,34 @@ export type FieldInputTypes = {
       readonly quantity: CodecTypes['pg/int4@1']['input'];
       readonly saleUnit: 'unit' | 'kg' | 'lb' | 'oz' | 'g' | 'liter' | 'ml';
       readonly weight: CodecTypes['pg/float8@1']['input'] | null;
+    };
+    readonly Register: {
+      readonly active: CodecTypes['pg/bool@1']['input'];
+      readonly createdAt: CodecTypes['pg/timestamp-temporal@1']['input'];
+      readonly id: CodecTypes['pg/int4@1']['input'];
+      readonly name: CodecTypes['pg/text@1']['input'] | null;
+      readonly number: CodecTypes['pg/int4@1']['input'];
+      readonly updatedAt: CodecTypes['pg/timestamp-temporal@1']['input'];
+    };
+    readonly RegisterSession: {
+      readonly businessDayId: CodecTypes['pg/int4@1']['input'];
+      readonly cardTotal: CodecTypes['pg/float8@1']['input'] | null;
+      readonly cashTotal: CodecTypes['pg/float8@1']['input'] | null;
+      readonly cashVariance: CodecTypes['pg/float8@1']['input'] | null;
+      readonly cashierUserId: CodecTypes['pg/int4@1']['input'];
+      readonly closedAt: CodecTypes['pg/timestamp-temporal@1']['input'] | null;
+      readonly closedByUserId: CodecTypes['pg/int4@1']['input'] | null;
+      readonly countedCash: CodecTypes['pg/float8@1']['input'] | null;
+      readonly expectedCash: CodecTypes['pg/float8@1']['input'] | null;
+      readonly id: CodecTypes['pg/int4@1']['input'];
+      readonly openedAt: CodecTypes['pg/timestamp-temporal@1']['input'];
+      readonly openedByUserId: CodecTypes['pg/int4@1']['input'];
+      readonly openingFloat: CodecTypes['pg/float8@1']['input'];
+      readonly purchaseCount: CodecTypes['pg/int4@1']['input'] | null;
+      readonly registerId: CodecTypes['pg/int4@1']['input'];
+      readonly status: 'open' | 'closed';
+      readonly totalSales: CodecTypes['pg/float8@1']['input'] | null;
+      readonly transferTotal: CodecTypes['pg/float8@1']['input'] | null;
     };
     readonly TransferConfig: {
       readonly gmailAddress: CodecTypes['pg/text@1']['input'];
@@ -420,7 +522,25 @@ export type StorageColumnTypes = {
       readonly payerName: CodecTypes['pg/text@1']['output'];
       readonly purchaseId: CodecTypes['pg/int4@1']['output'] | null;
     };
+    readonly business_days: {
+      readonly businessDate: CodecTypes['pg/text@1']['output'];
+      readonly closedAt: CodecTypes['pg/timestamp-temporal@1']['output'] | null;
+      readonly closedByUserId: CodecTypes['pg/int4@1']['output'] | null;
+      readonly id: CodecTypes['pg/int4@1']['output'];
+      readonly openedAt: CodecTypes['pg/timestamp-temporal@1']['output'];
+      readonly openedByUserId: CodecTypes['pg/int4@1']['output'];
+      readonly purchaseCount: CodecTypes['pg/int4@1']['output'] | null;
+      readonly status: 'open' | 'closed';
+      readonly totalCard: CodecTypes['pg/float8@1']['output'] | null;
+      readonly totalCash: CodecTypes['pg/float8@1']['output'] | null;
+      readonly totalCashVariance: CodecTypes['pg/float8@1']['output'] | null;
+      readonly totalCountedCash: CodecTypes['pg/float8@1']['output'] | null;
+      readonly totalExpectedCash: CodecTypes['pg/float8@1']['output'] | null;
+      readonly totalSales: CodecTypes['pg/float8@1']['output'] | null;
+      readonly totalTransfer: CodecTypes['pg/float8@1']['output'] | null;
+    };
     readonly products: {
+      readonly code: CodecTypes['pg/text@1']['output'];
       readonly createdAt: CodecTypes['pg/timestamp-temporal@1']['output'];
       readonly id: CodecTypes['pg/int4@1']['output'];
       readonly image: CodecTypes['pg/text@1']['output'] | null;
@@ -442,18 +562,51 @@ export type StorageColumnTypes = {
       readonly weight: CodecTypes['pg/float8@1']['output'] | null;
     };
     readonly purchases: {
+      readonly cardAmount: CodecTypes['pg/float8@1']['output'];
+      readonly cashAmount: CodecTypes['pg/float8@1']['output'];
+      readonly cashierUserId: CodecTypes['pg/int4@1']['output'] | null;
       readonly createdAt: CodecTypes['pg/timestamp-temporal@1']['output'];
       readonly id: CodecTypes['pg/int4@1']['output'];
       readonly orderNumber: CodecTypes['pg/text@1']['output'];
       readonly payerName: CodecTypes['pg/text@1']['output'] | null;
       readonly paymentType: 'cash' | 'card' | 'transfer';
+      readonly registerSessionId: CodecTypes['pg/int4@1']['output'] | null;
       readonly subtotal: CodecTypes['pg/float8@1']['output'];
       readonly tax: CodecTypes['pg/float8@1']['output'];
       readonly total: CodecTypes['pg/float8@1']['output'];
+      readonly transferAmount: CodecTypes['pg/float8@1']['output'];
       readonly transferMessageId: CodecTypes['pg/text@1']['output'] | null;
       readonly transferStatus: 'pending' | 'validated' | null;
       readonly updatedAt: CodecTypes['pg/timestamp-temporal@1']['output'];
       readonly validatedAt: CodecTypes['pg/timestamp-temporal@1']['output'] | null;
+    };
+    readonly register_sessions: {
+      readonly businessDayId: CodecTypes['pg/int4@1']['output'];
+      readonly cardTotal: CodecTypes['pg/float8@1']['output'] | null;
+      readonly cashierUserId: CodecTypes['pg/int4@1']['output'];
+      readonly cashTotal: CodecTypes['pg/float8@1']['output'] | null;
+      readonly cashVariance: CodecTypes['pg/float8@1']['output'] | null;
+      readonly closedAt: CodecTypes['pg/timestamp-temporal@1']['output'] | null;
+      readonly closedByUserId: CodecTypes['pg/int4@1']['output'] | null;
+      readonly countedCash: CodecTypes['pg/float8@1']['output'] | null;
+      readonly expectedCash: CodecTypes['pg/float8@1']['output'] | null;
+      readonly id: CodecTypes['pg/int4@1']['output'];
+      readonly openedAt: CodecTypes['pg/timestamp-temporal@1']['output'];
+      readonly openedByUserId: CodecTypes['pg/int4@1']['output'];
+      readonly openingFloat: CodecTypes['pg/float8@1']['output'];
+      readonly purchaseCount: CodecTypes['pg/int4@1']['output'] | null;
+      readonly registerId: CodecTypes['pg/int4@1']['output'];
+      readonly status: 'open' | 'closed';
+      readonly totalSales: CodecTypes['pg/float8@1']['output'] | null;
+      readonly transferTotal: CodecTypes['pg/float8@1']['output'] | null;
+    };
+    readonly registers: {
+      readonly active: CodecTypes['pg/bool@1']['output'];
+      readonly createdAt: CodecTypes['pg/timestamp-temporal@1']['output'];
+      readonly id: CodecTypes['pg/int4@1']['output'];
+      readonly name: CodecTypes['pg/text@1']['output'] | null;
+      readonly number: CodecTypes['pg/int4@1']['output'];
+      readonly updatedAt: CodecTypes['pg/timestamp-temporal@1']['output'];
     };
     readonly transfer_configs: {
       readonly gmailAddress: CodecTypes['pg/text@1']['output'];
@@ -496,7 +649,25 @@ export type StorageColumnInputTypes = {
       readonly payerName: CodecTypes['pg/text@1']['input'];
       readonly purchaseId: CodecTypes['pg/int4@1']['input'] | null;
     };
+    readonly business_days: {
+      readonly businessDate: CodecTypes['pg/text@1']['input'];
+      readonly closedAt: CodecTypes['pg/timestamp-temporal@1']['input'] | null;
+      readonly closedByUserId: CodecTypes['pg/int4@1']['input'] | null;
+      readonly id: CodecTypes['pg/int4@1']['input'];
+      readonly openedAt: CodecTypes['pg/timestamp-temporal@1']['input'];
+      readonly openedByUserId: CodecTypes['pg/int4@1']['input'];
+      readonly purchaseCount: CodecTypes['pg/int4@1']['input'] | null;
+      readonly status: 'open' | 'closed';
+      readonly totalCard: CodecTypes['pg/float8@1']['input'] | null;
+      readonly totalCash: CodecTypes['pg/float8@1']['input'] | null;
+      readonly totalCashVariance: CodecTypes['pg/float8@1']['input'] | null;
+      readonly totalCountedCash: CodecTypes['pg/float8@1']['input'] | null;
+      readonly totalExpectedCash: CodecTypes['pg/float8@1']['input'] | null;
+      readonly totalSales: CodecTypes['pg/float8@1']['input'] | null;
+      readonly totalTransfer: CodecTypes['pg/float8@1']['input'] | null;
+    };
     readonly products: {
+      readonly code: CodecTypes['pg/text@1']['input'];
       readonly createdAt: CodecTypes['pg/timestamp-temporal@1']['input'];
       readonly id: CodecTypes['pg/int4@1']['input'];
       readonly image: CodecTypes['pg/text@1']['input'] | null;
@@ -518,18 +689,51 @@ export type StorageColumnInputTypes = {
       readonly weight: CodecTypes['pg/float8@1']['input'] | null;
     };
     readonly purchases: {
+      readonly cardAmount: CodecTypes['pg/float8@1']['input'];
+      readonly cashAmount: CodecTypes['pg/float8@1']['input'];
+      readonly cashierUserId: CodecTypes['pg/int4@1']['input'] | null;
       readonly createdAt: CodecTypes['pg/timestamp-temporal@1']['input'];
       readonly id: CodecTypes['pg/int4@1']['input'];
       readonly orderNumber: CodecTypes['pg/text@1']['input'];
       readonly payerName: CodecTypes['pg/text@1']['input'] | null;
       readonly paymentType: 'cash' | 'card' | 'transfer';
+      readonly registerSessionId: CodecTypes['pg/int4@1']['input'] | null;
       readonly subtotal: CodecTypes['pg/float8@1']['input'];
       readonly tax: CodecTypes['pg/float8@1']['input'];
       readonly total: CodecTypes['pg/float8@1']['input'];
+      readonly transferAmount: CodecTypes['pg/float8@1']['input'];
       readonly transferMessageId: CodecTypes['pg/text@1']['input'] | null;
       readonly transferStatus: 'pending' | 'validated' | null;
       readonly updatedAt: CodecTypes['pg/timestamp-temporal@1']['input'];
       readonly validatedAt: CodecTypes['pg/timestamp-temporal@1']['input'] | null;
+    };
+    readonly register_sessions: {
+      readonly businessDayId: CodecTypes['pg/int4@1']['input'];
+      readonly cardTotal: CodecTypes['pg/float8@1']['input'] | null;
+      readonly cashierUserId: CodecTypes['pg/int4@1']['input'];
+      readonly cashTotal: CodecTypes['pg/float8@1']['input'] | null;
+      readonly cashVariance: CodecTypes['pg/float8@1']['input'] | null;
+      readonly closedAt: CodecTypes['pg/timestamp-temporal@1']['input'] | null;
+      readonly closedByUserId: CodecTypes['pg/int4@1']['input'] | null;
+      readonly countedCash: CodecTypes['pg/float8@1']['input'] | null;
+      readonly expectedCash: CodecTypes['pg/float8@1']['input'] | null;
+      readonly id: CodecTypes['pg/int4@1']['input'];
+      readonly openedAt: CodecTypes['pg/timestamp-temporal@1']['input'];
+      readonly openedByUserId: CodecTypes['pg/int4@1']['input'];
+      readonly openingFloat: CodecTypes['pg/float8@1']['input'];
+      readonly purchaseCount: CodecTypes['pg/int4@1']['input'] | null;
+      readonly registerId: CodecTypes['pg/int4@1']['input'];
+      readonly status: 'open' | 'closed';
+      readonly totalSales: CodecTypes['pg/float8@1']['input'] | null;
+      readonly transferTotal: CodecTypes['pg/float8@1']['input'] | null;
+    };
+    readonly registers: {
+      readonly active: CodecTypes['pg/bool@1']['input'];
+      readonly createdAt: CodecTypes['pg/timestamp-temporal@1']['input'];
+      readonly id: CodecTypes['pg/int4@1']['input'];
+      readonly name: CodecTypes['pg/text@1']['input'] | null;
+      readonly number: CodecTypes['pg/int4@1']['input'];
+      readonly updatedAt: CodecTypes['pg/timestamp-temporal@1']['input'];
     };
     readonly transfer_configs: {
       readonly gmailAddress: CodecTypes['pg/text@1']['input'];
@@ -575,7 +779,29 @@ export namespace Models {
     purchase: public_Purchase | null;
     readonly [RelationKeys]?: 'purchase';
   };
+  export type public_BusinessDay = {
+    businessDate: CodecTypes['pg/text@1']['output'];
+    closedAt: CodecTypes['pg/timestamp-temporal@1']['output'] | null;
+    closedByUserId: CodecTypes['pg/int4@1']['output'] | null;
+    id: CodecTypes['pg/int4@1']['output'];
+    openedAt: CodecTypes['pg/timestamp-temporal@1']['output'];
+    openedByUserId: CodecTypes['pg/int4@1']['output'];
+    purchaseCount: CodecTypes['pg/int4@1']['output'] | null;
+    status: 'open' | 'closed';
+    totalCard: CodecTypes['pg/float8@1']['output'] | null;
+    totalCash: CodecTypes['pg/float8@1']['output'] | null;
+    totalCashVariance: CodecTypes['pg/float8@1']['output'] | null;
+    totalCountedCash: CodecTypes['pg/float8@1']['output'] | null;
+    totalExpectedCash: CodecTypes['pg/float8@1']['output'] | null;
+    totalSales: CodecTypes['pg/float8@1']['output'] | null;
+    totalTransfer: CodecTypes['pg/float8@1']['output'] | null;
+    closedBy: public_User | null;
+    openedBy: public_User;
+    sessions: public_RegisterSession[];
+    readonly [RelationKeys]?: 'closedBy' | 'openedBy' | 'sessions';
+  };
   export type public_Product = {
+    code: CodecTypes['pg/text@1']['output'];
     createdAt: CodecTypes['pg/timestamp-temporal@1']['output'];
     id: CodecTypes['pg/int4@1']['output'];
     image: CodecTypes['pg/text@1']['output'] | null;
@@ -587,20 +813,27 @@ export namespace Models {
     readonly [RelationKeys]?: 'purchaseDetails';
   };
   export type public_Purchase = {
+    cardAmount: CodecTypes['pg/float8@1']['output'];
+    cashAmount: CodecTypes['pg/float8@1']['output'];
+    cashierUserId: CodecTypes['pg/int4@1']['output'] | null;
     createdAt: CodecTypes['pg/timestamp-temporal@1']['output'];
     id: CodecTypes['pg/int4@1']['output'];
     orderNumber: CodecTypes['pg/text@1']['output'];
     payerName: CodecTypes['pg/text@1']['output'] | null;
     paymentType: 'cash' | 'card' | 'transfer';
+    registerSessionId: CodecTypes['pg/int4@1']['output'] | null;
     subtotal: CodecTypes['pg/float8@1']['output'];
     tax: CodecTypes['pg/float8@1']['output'];
     total: CodecTypes['pg/float8@1']['output'];
+    transferAmount: CodecTypes['pg/float8@1']['output'];
     transferMessageId: CodecTypes['pg/text@1']['output'] | null;
     transferStatus: 'pending' | 'validated' | null;
     updatedAt: CodecTypes['pg/timestamp-temporal@1']['output'];
     validatedAt: CodecTypes['pg/timestamp-temporal@1']['output'] | null;
+    cashier: public_User | null;
     details: public_PurchaseDetail[];
-    readonly [RelationKeys]?: 'details';
+    registerSession: public_RegisterSession | null;
+    readonly [RelationKeys]?: 'cashier' | 'details' | 'registerSession';
   };
   export type public_PurchaseDetail = {
     createdAt: CodecTypes['pg/timestamp-temporal@1']['output'];
@@ -616,6 +849,44 @@ export namespace Models {
     product: public_Product;
     purchase: public_Purchase;
     readonly [RelationKeys]?: 'product' | 'purchase';
+  };
+  export type public_Register = {
+    active: CodecTypes['pg/bool@1']['output'];
+    createdAt: CodecTypes['pg/timestamp-temporal@1']['output'];
+    id: CodecTypes['pg/int4@1']['output'];
+    name: CodecTypes['pg/text@1']['output'] | null;
+    number: CodecTypes['pg/int4@1']['output'];
+    updatedAt: CodecTypes['pg/timestamp-temporal@1']['output'];
+    sessions: public_RegisterSession[];
+    readonly [RelationKeys]?: 'sessions';
+  };
+  export type public_RegisterSession = {
+    businessDayId: CodecTypes['pg/int4@1']['output'];
+    cardTotal: CodecTypes['pg/float8@1']['output'] | null;
+    cashTotal: CodecTypes['pg/float8@1']['output'] | null;
+    cashVariance: CodecTypes['pg/float8@1']['output'] | null;
+    cashierUserId: CodecTypes['pg/int4@1']['output'];
+    closedAt: CodecTypes['pg/timestamp-temporal@1']['output'] | null;
+    closedByUserId: CodecTypes['pg/int4@1']['output'] | null;
+    countedCash: CodecTypes['pg/float8@1']['output'] | null;
+    expectedCash: CodecTypes['pg/float8@1']['output'] | null;
+    id: CodecTypes['pg/int4@1']['output'];
+    openedAt: CodecTypes['pg/timestamp-temporal@1']['output'];
+    openedByUserId: CodecTypes['pg/int4@1']['output'];
+    openingFloat: CodecTypes['pg/float8@1']['output'];
+    purchaseCount: CodecTypes['pg/int4@1']['output'] | null;
+    registerId: CodecTypes['pg/int4@1']['output'];
+    status: 'open' | 'closed';
+    totalSales: CodecTypes['pg/float8@1']['output'] | null;
+    transferTotal: CodecTypes['pg/float8@1']['output'] | null;
+    businessDay: public_BusinessDay;
+    cashier: public_User;
+    closedBy: public_User | null;
+    openedBy: public_User;
+    purchases: public_Purchase[];
+    register: public_Register;
+    readonly [RelationKeys]?:
+      'businessDay' | 'cashier' | 'closedBy' | 'openedBy' | 'purchases' | 'register';
   };
   export type public_TransferConfig = {
     gmailAddress: CodecTypes['pg/text@1']['output'];
@@ -635,7 +906,19 @@ export namespace Models {
     role: 'administrador' | 'cajero';
     updatedAt: CodecTypes['pg/timestamp-temporal@1']['output'];
     username: CodecTypes['pg/text@1']['output'];
-    readonly [RelationKeys]?: never;
+    cashierSessions: public_RegisterSession[];
+    closedBusinessDays: public_BusinessDay[];
+    closedSessions: public_RegisterSession[];
+    openedBusinessDays: public_BusinessDay[];
+    openedSessions: public_RegisterSession[];
+    purchasesAsCashier: public_Purchase[];
+    readonly [RelationKeys]?:
+      | 'cashierSessions'
+      | 'closedBusinessDays'
+      | 'closedSessions'
+      | 'openedBusinessDays'
+      | 'openedSessions'
+      | 'purchasesAsCashier';
   };
 }
 
@@ -643,9 +926,12 @@ export declare const models: {
   public: {
     AnnouncedTransfer: Models.public_AnnouncedTransfer;
     BankTransfer: Models.public_BankTransfer;
+    BusinessDay: Models.public_BusinessDay;
     Product: Models.public_Product;
     Purchase: Models.public_Purchase;
     PurchaseDetail: Models.public_PurchaseDetail;
+    Register: Models.public_Register;
+    RegisterSession: Models.public_RegisterSession;
     TransferConfig: Models.public_TransferConfig;
     User: Models.public_User;
   };
@@ -811,8 +1097,144 @@ type ContractBase = Omit<
                 },
               ];
             };
+            readonly business_days: {
+              columns: {
+                readonly businessDate: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                };
+                readonly closedAt: {
+                  readonly nativeType: 'timestamp';
+                  readonly codecId: 'pg/timestamp-temporal@1';
+                  readonly nullable: true;
+                  readonly typeParams: { readonly precision: 3 };
+                };
+                readonly closedByUserId: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: true;
+                };
+                readonly id: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'function';
+                    readonly expression: 'autoincrement()';
+                  };
+                };
+                readonly openedAt: {
+                  readonly nativeType: 'timestamp';
+                  readonly codecId: 'pg/timestamp-temporal@1';
+                  readonly nullable: false;
+                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
+                  readonly typeParams: { readonly precision: 3 };
+                };
+                readonly openedByUserId: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                };
+                readonly purchaseCount: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: true;
+                };
+                readonly status: {
+                  readonly nativeType: 'BusinessDayStatus';
+                  readonly codecId: 'pg/enum@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/enum@1', 'open'>;
+                  };
+                  readonly typeParams: { readonly typeName: 'BusinessDayStatus' };
+                };
+                readonly totalCard: {
+                  readonly nativeType: 'float8';
+                  readonly codecId: 'pg/float8@1';
+                  readonly nullable: true;
+                };
+                readonly totalCash: {
+                  readonly nativeType: 'float8';
+                  readonly codecId: 'pg/float8@1';
+                  readonly nullable: true;
+                };
+                readonly totalCashVariance: {
+                  readonly nativeType: 'float8';
+                  readonly codecId: 'pg/float8@1';
+                  readonly nullable: true;
+                };
+                readonly totalCountedCash: {
+                  readonly nativeType: 'float8';
+                  readonly codecId: 'pg/float8@1';
+                  readonly nullable: true;
+                };
+                readonly totalExpectedCash: {
+                  readonly nativeType: 'float8';
+                  readonly codecId: 'pg/float8@1';
+                  readonly nullable: true;
+                };
+                readonly totalSales: {
+                  readonly nativeType: 'float8';
+                  readonly codecId: 'pg/float8@1';
+                  readonly nullable: true;
+                };
+                readonly totalTransfer: {
+                  readonly nativeType: 'float8';
+                  readonly codecId: 'pg/float8@1';
+                  readonly nullable: true;
+                };
+              };
+              primaryKey: {
+                readonly columns: readonly ['id'];
+                readonly name: 'business_days_pkey';
+              };
+              uniques: readonly [];
+              indexes: readonly [
+                {
+                  readonly name: 'business_days_businessDate_key';
+                  readonly columns: readonly ['businessDate'];
+                  readonly unique: true;
+                },
+              ];
+              foreignKeys: readonly [
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'business_days';
+                    readonly columns: readonly ['openedByUserId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'users';
+                    readonly columns: readonly ['id'];
+                  };
+                  readonly name: 'business_days_openedByUserId_fkey';
+                },
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'business_days';
+                    readonly columns: readonly ['closedByUserId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'users';
+                    readonly columns: readonly ['id'];
+                  };
+                  readonly name: 'business_days_closedByUserId_fkey';
+                },
+              ];
+            };
             readonly products: {
               columns: {
+                readonly code: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                };
                 readonly createdAt: {
                   readonly nativeType: 'timestamp';
                   readonly codecId: 'pg/timestamp-temporal@1';
@@ -863,7 +1285,13 @@ type ContractBase = Omit<
               };
               primaryKey: { readonly columns: readonly ['id']; readonly name: 'products_pkey' };
               uniques: readonly [];
-              indexes: readonly [];
+              indexes: readonly [
+                {
+                  readonly name: 'products_code_key';
+                  readonly columns: readonly ['code'];
+                  readonly unique: true;
+                },
+              ];
               foreignKeys: readonly [];
             };
             readonly purchase_details: {
@@ -967,6 +1395,29 @@ type ContractBase = Omit<
             };
             readonly purchases: {
               columns: {
+                readonly cardAmount: {
+                  readonly nativeType: 'float8';
+                  readonly codecId: 'pg/float8@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/float8@1', 0>;
+                  };
+                };
+                readonly cashAmount: {
+                  readonly nativeType: 'float8';
+                  readonly codecId: 'pg/float8@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/float8@1', 0>;
+                  };
+                };
+                readonly cashierUserId: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: true;
+                };
                 readonly createdAt: {
                   readonly nativeType: 'timestamp';
                   readonly codecId: 'pg/timestamp-temporal@1';
@@ -999,6 +1450,11 @@ type ContractBase = Omit<
                   readonly nullable: false;
                   readonly typeParams: { readonly typeName: 'PaymentType' };
                 };
+                readonly registerSessionId: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: true;
+                };
                 readonly subtotal: {
                   readonly nativeType: 'float8';
                   readonly codecId: 'pg/float8@1';
@@ -1013,6 +1469,15 @@ type ContractBase = Omit<
                   readonly nativeType: 'float8';
                   readonly codecId: 'pg/float8@1';
                   readonly nullable: false;
+                };
+                readonly transferAmount: {
+                  readonly nativeType: 'float8';
+                  readonly codecId: 'pg/float8@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/float8@1', 0>;
+                  };
                 };
                 readonly transferMessageId: {
                   readonly nativeType: 'text';
@@ -1042,13 +1507,299 @@ type ContractBase = Omit<
               uniques: readonly [];
               indexes: readonly [
                 {
+                  readonly name: 'purchases_cashierUserId_idx';
+                  readonly columns: readonly ['cashierUserId'];
+                  readonly unique: false;
+                },
+                {
                   readonly name: 'purchases_orderNumber_key';
                   readonly columns: readonly ['orderNumber'];
                   readonly unique: true;
                 },
                 {
+                  readonly name: 'purchases_registerSessionId_idx';
+                  readonly columns: readonly ['registerSessionId'];
+                  readonly unique: false;
+                },
+                {
                   readonly name: 'purchases_transferMessageId_key';
                   readonly columns: readonly ['transferMessageId'];
+                  readonly unique: true;
+                },
+              ];
+              foreignKeys: readonly [
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'purchases';
+                    readonly columns: readonly ['registerSessionId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'register_sessions';
+                    readonly columns: readonly ['id'];
+                  };
+                  readonly name: 'purchases_registerSessionId_fkey';
+                },
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'purchases';
+                    readonly columns: readonly ['cashierUserId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'users';
+                    readonly columns: readonly ['id'];
+                  };
+                  readonly name: 'purchases_cashierUserId_fkey';
+                },
+              ];
+            };
+            readonly register_sessions: {
+              columns: {
+                readonly businessDayId: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                };
+                readonly cardTotal: {
+                  readonly nativeType: 'float8';
+                  readonly codecId: 'pg/float8@1';
+                  readonly nullable: true;
+                };
+                readonly cashTotal: {
+                  readonly nativeType: 'float8';
+                  readonly codecId: 'pg/float8@1';
+                  readonly nullable: true;
+                };
+                readonly cashVariance: {
+                  readonly nativeType: 'float8';
+                  readonly codecId: 'pg/float8@1';
+                  readonly nullable: true;
+                };
+                readonly cashierUserId: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                };
+                readonly closedAt: {
+                  readonly nativeType: 'timestamp';
+                  readonly codecId: 'pg/timestamp-temporal@1';
+                  readonly nullable: true;
+                  readonly typeParams: { readonly precision: 3 };
+                };
+                readonly closedByUserId: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: true;
+                };
+                readonly countedCash: {
+                  readonly nativeType: 'float8';
+                  readonly codecId: 'pg/float8@1';
+                  readonly nullable: true;
+                };
+                readonly expectedCash: {
+                  readonly nativeType: 'float8';
+                  readonly codecId: 'pg/float8@1';
+                  readonly nullable: true;
+                };
+                readonly id: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'function';
+                    readonly expression: 'autoincrement()';
+                  };
+                };
+                readonly openedAt: {
+                  readonly nativeType: 'timestamp';
+                  readonly codecId: 'pg/timestamp-temporal@1';
+                  readonly nullable: false;
+                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
+                  readonly typeParams: { readonly precision: 3 };
+                };
+                readonly openedByUserId: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                };
+                readonly openingFloat: {
+                  readonly nativeType: 'float8';
+                  readonly codecId: 'pg/float8@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/float8@1', 0>;
+                  };
+                };
+                readonly purchaseCount: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: true;
+                };
+                readonly registerId: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                };
+                readonly status: {
+                  readonly nativeType: 'RegisterSessionStatus';
+                  readonly codecId: 'pg/enum@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/enum@1', 'open'>;
+                  };
+                  readonly typeParams: { readonly typeName: 'RegisterSessionStatus' };
+                };
+                readonly totalSales: {
+                  readonly nativeType: 'float8';
+                  readonly codecId: 'pg/float8@1';
+                  readonly nullable: true;
+                };
+                readonly transferTotal: {
+                  readonly nativeType: 'float8';
+                  readonly codecId: 'pg/float8@1';
+                  readonly nullable: true;
+                };
+              };
+              primaryKey: {
+                readonly columns: readonly ['id'];
+                readonly name: 'register_sessions_pkey';
+              };
+              uniques: readonly [];
+              indexes: readonly [
+                {
+                  readonly name: 'register_sessions_businessDayId_idx';
+                  readonly columns: readonly ['businessDayId'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'register_sessions_registerId_idx';
+                  readonly columns: readonly ['registerId'];
+                  readonly unique: false;
+                },
+              ];
+              foreignKeys: readonly [
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'register_sessions';
+                    readonly columns: readonly ['registerId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'registers';
+                    readonly columns: readonly ['id'];
+                  };
+                  readonly name: 'register_sessions_registerId_fkey';
+                },
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'register_sessions';
+                    readonly columns: readonly ['businessDayId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'business_days';
+                    readonly columns: readonly ['id'];
+                  };
+                  readonly name: 'register_sessions_businessDayId_fkey';
+                },
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'register_sessions';
+                    readonly columns: readonly ['cashierUserId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'users';
+                    readonly columns: readonly ['id'];
+                  };
+                  readonly name: 'register_sessions_cashierUserId_fkey';
+                },
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'register_sessions';
+                    readonly columns: readonly ['openedByUserId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'users';
+                    readonly columns: readonly ['id'];
+                  };
+                  readonly name: 'register_sessions_openedByUserId_fkey';
+                },
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'register_sessions';
+                    readonly columns: readonly ['closedByUserId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'users';
+                    readonly columns: readonly ['id'];
+                  };
+                  readonly name: 'register_sessions_closedByUserId_fkey';
+                },
+              ];
+            };
+            readonly registers: {
+              columns: {
+                readonly active: {
+                  readonly nativeType: 'bool';
+                  readonly codecId: 'pg/bool@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/bool@1', true>;
+                  };
+                };
+                readonly createdAt: {
+                  readonly nativeType: 'timestamp';
+                  readonly codecId: 'pg/timestamp-temporal@1';
+                  readonly nullable: false;
+                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
+                  readonly typeParams: { readonly precision: 3 };
+                };
+                readonly id: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'function';
+                    readonly expression: 'autoincrement()';
+                  };
+                };
+                readonly name: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                };
+                readonly number: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                };
+                readonly updatedAt: {
+                  readonly nativeType: 'timestamp';
+                  readonly codecId: 'pg/timestamp-temporal@1';
+                  readonly nullable: false;
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+              primaryKey: { readonly columns: readonly ['id']; readonly name: 'registers_pkey' };
+              uniques: readonly [];
+              indexes: readonly [
+                {
+                  readonly name: 'registers_number_key';
+                  readonly columns: readonly ['number'];
                   readonly unique: true;
                 },
               ];
@@ -1172,9 +1923,17 @@ type ContractBase = Omit<
             };
           };
           readonly valueSet: {
+            readonly BusinessDayStatus: {
+              readonly kind: 'valueSet';
+              readonly values: readonly ['open', 'closed'];
+            };
             readonly PaymentType: {
               readonly kind: 'valueSet';
               readonly values: readonly ['cash', 'card', 'transfer'];
+            };
+            readonly RegisterSessionStatus: {
+              readonly kind: 'valueSet';
+              readonly values: readonly ['open', 'closed'];
             };
             readonly SaleUnit: {
               readonly kind: 'valueSet';
@@ -1207,12 +1966,21 @@ type ContractBase = Omit<
       readonly namespace: 'public' & NamespaceId;
       readonly model: 'BankTransfer';
     };
+    readonly business_days: {
+      readonly namespace: 'public' & NamespaceId;
+      readonly model: 'BusinessDay';
+    };
     readonly products: { readonly namespace: 'public' & NamespaceId; readonly model: 'Product' };
     readonly purchase_details: {
       readonly namespace: 'public' & NamespaceId;
       readonly model: 'PurchaseDetail';
     };
     readonly purchases: { readonly namespace: 'public' & NamespaceId; readonly model: 'Purchase' };
+    readonly register_sessions: {
+      readonly namespace: 'public' & NamespaceId;
+      readonly model: 'RegisterSession';
+    };
+    readonly registers: { readonly namespace: 'public' & NamespaceId; readonly model: 'Register' };
     readonly transfer_configs: {
       readonly namespace: 'public' & NamespaceId;
       readonly model: 'TransferConfig';
@@ -1349,8 +2117,140 @@ type ContractBase = Omit<
               };
             };
           };
+          readonly BusinessDay: {
+            readonly fields: {
+              readonly businessDate: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly closedAt: {
+                readonly nullable: true;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamp-temporal@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+              readonly closedByUserId: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly id: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly openedAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamp-temporal@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+              readonly openedByUserId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly purchaseCount: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly status: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/enum@1';
+                  readonly typeParams: { readonly typeName: 'BusinessDayStatus' };
+                };
+              };
+              readonly totalCard: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/float8@1' };
+              };
+              readonly totalCash: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/float8@1' };
+              };
+              readonly totalCashVariance: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/float8@1' };
+              };
+              readonly totalCountedCash: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/float8@1' };
+              };
+              readonly totalExpectedCash: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/float8@1' };
+              };
+              readonly totalSales: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/float8@1' };
+              };
+              readonly totalTransfer: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/float8@1' };
+              };
+            };
+            readonly relations: {
+              readonly closedBy: {
+                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
+                readonly cardinality: 'N:1';
+                readonly nullable: true;
+                readonly on: {
+                  readonly localFields: readonly ['closedByUserId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+              readonly openedBy: {
+                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['openedByUserId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+              readonly sessions: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'RegisterSession';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['businessDayId'];
+                };
+              };
+            };
+            readonly storage: {
+              readonly table: 'business_days';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly businessDate: { readonly column: 'businessDate' };
+                readonly closedAt: { readonly column: 'closedAt' };
+                readonly closedByUserId: { readonly column: 'closedByUserId' };
+                readonly id: { readonly column: 'id' };
+                readonly openedAt: { readonly column: 'openedAt' };
+                readonly openedByUserId: { readonly column: 'openedByUserId' };
+                readonly purchaseCount: { readonly column: 'purchaseCount' };
+                readonly status: { readonly column: 'status' };
+                readonly totalCard: { readonly column: 'totalCard' };
+                readonly totalCash: { readonly column: 'totalCash' };
+                readonly totalCashVariance: { readonly column: 'totalCashVariance' };
+                readonly totalCountedCash: { readonly column: 'totalCountedCash' };
+                readonly totalExpectedCash: { readonly column: 'totalExpectedCash' };
+                readonly totalSales: { readonly column: 'totalSales' };
+                readonly totalTransfer: { readonly column: 'totalTransfer' };
+              };
+            };
+          };
           readonly Product: {
             readonly fields: {
+              readonly code: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
               readonly createdAt: {
                 readonly nullable: false;
                 readonly type: {
@@ -1409,6 +2309,7 @@ type ContractBase = Omit<
               readonly table: 'products';
               readonly namespaceId: 'public';
               readonly fields: {
+                readonly code: { readonly column: 'code' };
                 readonly createdAt: { readonly column: 'createdAt' };
                 readonly id: { readonly column: 'id' };
                 readonly image: { readonly column: 'image' };
@@ -1421,6 +2322,18 @@ type ContractBase = Omit<
           };
           readonly Purchase: {
             readonly fields: {
+              readonly cardAmount: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/float8@1' };
+              };
+              readonly cashAmount: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/float8@1' };
+              };
+              readonly cashierUserId: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
               readonly createdAt: {
                 readonly nullable: false;
                 readonly type: {
@@ -1449,6 +2362,10 @@ type ContractBase = Omit<
                   readonly typeParams: { readonly typeName: 'PaymentType' };
                 };
               };
+              readonly registerSessionId: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
               readonly subtotal: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/float8@1' };
@@ -1458,6 +2375,10 @@ type ContractBase = Omit<
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/float8@1' };
               };
               readonly total: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/float8@1' };
+              };
+              readonly transferAmount: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/float8@1' };
               };
@@ -1491,6 +2412,15 @@ type ContractBase = Omit<
               };
             };
             readonly relations: {
+              readonly cashier: {
+                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
+                readonly cardinality: 'N:1';
+                readonly nullable: true;
+                readonly on: {
+                  readonly localFields: readonly ['cashierUserId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
               readonly details: {
                 readonly to: {
                   readonly namespace: 'public' & NamespaceId;
@@ -1502,19 +2432,36 @@ type ContractBase = Omit<
                   readonly targetFields: readonly ['purchaseId'];
                 };
               };
+              readonly registerSession: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'RegisterSession';
+                };
+                readonly cardinality: 'N:1';
+                readonly nullable: true;
+                readonly on: {
+                  readonly localFields: readonly ['registerSessionId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
             };
             readonly storage: {
               readonly table: 'purchases';
               readonly namespaceId: 'public';
               readonly fields: {
+                readonly cardAmount: { readonly column: 'cardAmount' };
+                readonly cashAmount: { readonly column: 'cashAmount' };
+                readonly cashierUserId: { readonly column: 'cashierUserId' };
                 readonly createdAt: { readonly column: 'createdAt' };
                 readonly id: { readonly column: 'id' };
                 readonly orderNumber: { readonly column: 'orderNumber' };
                 readonly payerName: { readonly column: 'payerName' };
                 readonly paymentType: { readonly column: 'paymentType' };
+                readonly registerSessionId: { readonly column: 'registerSessionId' };
                 readonly subtotal: { readonly column: 'subtotal' };
                 readonly tax: { readonly column: 'tax' };
                 readonly total: { readonly column: 'total' };
+                readonly transferAmount: { readonly column: 'transferAmount' };
                 readonly transferMessageId: { readonly column: 'transferMessageId' };
                 readonly transferStatus: { readonly column: 'transferStatus' };
                 readonly updatedAt: { readonly column: 'updatedAt' };
@@ -1616,6 +2563,243 @@ type ContractBase = Omit<
               };
             };
           };
+          readonly Register: {
+            readonly fields: {
+              readonly active: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/bool@1' };
+              };
+              readonly createdAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamp-temporal@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+              readonly id: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly name: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly number: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly updatedAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamp-temporal@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+            };
+            readonly relations: {
+              readonly sessions: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'RegisterSession';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['registerId'];
+                };
+              };
+            };
+            readonly storage: {
+              readonly table: 'registers';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly active: { readonly column: 'active' };
+                readonly createdAt: { readonly column: 'createdAt' };
+                readonly id: { readonly column: 'id' };
+                readonly name: { readonly column: 'name' };
+                readonly number: { readonly column: 'number' };
+                readonly updatedAt: { readonly column: 'updatedAt' };
+              };
+            };
+          };
+          readonly RegisterSession: {
+            readonly fields: {
+              readonly businessDayId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly cardTotal: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/float8@1' };
+              };
+              readonly cashTotal: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/float8@1' };
+              };
+              readonly cashVariance: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/float8@1' };
+              };
+              readonly cashierUserId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly closedAt: {
+                readonly nullable: true;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamp-temporal@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+              readonly closedByUserId: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly countedCash: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/float8@1' };
+              };
+              readonly expectedCash: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/float8@1' };
+              };
+              readonly id: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly openedAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamp-temporal@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+              readonly openedByUserId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly openingFloat: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/float8@1' };
+              };
+              readonly purchaseCount: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly registerId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly status: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/enum@1';
+                  readonly typeParams: { readonly typeName: 'RegisterSessionStatus' };
+                };
+              };
+              readonly totalSales: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/float8@1' };
+              };
+              readonly transferTotal: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/float8@1' };
+              };
+            };
+            readonly relations: {
+              readonly businessDay: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'BusinessDay';
+                };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['businessDayId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+              readonly cashier: {
+                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['cashierUserId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+              readonly closedBy: {
+                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
+                readonly cardinality: 'N:1';
+                readonly nullable: true;
+                readonly on: {
+                  readonly localFields: readonly ['closedByUserId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+              readonly openedBy: {
+                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['openedByUserId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+              readonly purchases: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Purchase';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['registerSessionId'];
+                };
+              };
+              readonly register: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Register';
+                };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['registerId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+            };
+            readonly storage: {
+              readonly table: 'register_sessions';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly businessDayId: { readonly column: 'businessDayId' };
+                readonly cardTotal: { readonly column: 'cardTotal' };
+                readonly cashTotal: { readonly column: 'cashTotal' };
+                readonly cashVariance: { readonly column: 'cashVariance' };
+                readonly cashierUserId: { readonly column: 'cashierUserId' };
+                readonly closedAt: { readonly column: 'closedAt' };
+                readonly closedByUserId: { readonly column: 'closedByUserId' };
+                readonly countedCash: { readonly column: 'countedCash' };
+                readonly expectedCash: { readonly column: 'expectedCash' };
+                readonly id: { readonly column: 'id' };
+                readonly openedAt: { readonly column: 'openedAt' };
+                readonly openedByUserId: { readonly column: 'openedByUserId' };
+                readonly openingFloat: { readonly column: 'openingFloat' };
+                readonly purchaseCount: { readonly column: 'purchaseCount' };
+                readonly registerId: { readonly column: 'registerId' };
+                readonly status: { readonly column: 'status' };
+                readonly totalSales: { readonly column: 'totalSales' };
+                readonly transferTotal: { readonly column: 'transferTotal' };
+              };
+            };
+          };
           readonly TransferConfig: {
             readonly fields: {
               readonly gmailAddress: {
@@ -1708,7 +2892,74 @@ type ContractBase = Omit<
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
             };
-            readonly relations: Record<string, never>;
+            readonly relations: {
+              readonly cashierSessions: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'RegisterSession';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['cashierUserId'];
+                };
+              };
+              readonly closedBusinessDays: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'BusinessDay';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['closedByUserId'];
+                };
+              };
+              readonly closedSessions: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'RegisterSession';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['closedByUserId'];
+                };
+              };
+              readonly openedBusinessDays: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'BusinessDay';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['openedByUserId'];
+                };
+              };
+              readonly openedSessions: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'RegisterSession';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['openedByUserId'];
+                };
+              };
+              readonly purchasesAsCashier: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Purchase';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['cashierUserId'];
+                };
+              };
+            };
             readonly storage: {
               readonly table: 'users';
               readonly namespaceId: 'public';

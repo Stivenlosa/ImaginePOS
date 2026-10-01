@@ -1,6 +1,7 @@
 "use client";
 
 import { useIsMobile } from "@/hooks/use-mobile";
+import { formatMoney } from "@/lib/money";
 import type { ApexOptions } from "apexcharts";
 import dynamic from "next/dynamic";
 
@@ -8,13 +9,14 @@ type PropsType = {
   data: {
     received: { x: unknown; y: number }[];
   };
+  seriesName: string;
 };
 
 const Chart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
 });
 
-export function PaymentsOverviewChart({ data }: PropsType) {
+export function PaymentsOverviewChart({ data, seriesName }: PropsType) {
   const isMobile = useIsMobile();
 
   const options: ApexOptions = {
@@ -74,7 +76,7 @@ export function PaymentsOverviewChart({ data }: PropsType) {
         show: true,
       },
       y: {
-        formatter: (val: number) => `$${val.toFixed(2)}`,
+        formatter: (val: number) => formatMoney(val),
       },
     },
     xaxis: {
@@ -87,7 +89,7 @@ export function PaymentsOverviewChart({ data }: PropsType) {
     },
     yaxis: {
       labels: {
-        formatter: (val: number) => `$${val.toFixed(0)}`,
+        formatter: (val: number) => formatMoney(val),
       },
     },
   };
@@ -98,7 +100,7 @@ export function PaymentsOverviewChart({ data }: PropsType) {
         options={options}
         series={[
           {
-            name: "Received",
+            name: seriesName,
             data: data.received,
           },
         ]}

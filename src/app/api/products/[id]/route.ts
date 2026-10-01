@@ -1,4 +1,9 @@
 import { NextResponse } from "next/server";
+import { roundMoney } from "@/lib/money";
+import {
+    isValidProductCode,
+    normalizeProductCode,
+} from "@/lib/product-code";
 import { nowTimestamp } from "@/prisma/dates";
 import { db } from "@/prisma/db";
 import type { SaleUnit } from "@/types/product";
@@ -53,17 +58,50 @@ export async function PUT(request: Request, { params }: RouteParams) {
         }
 
         const body = await request.json();
-        const { name, price, image, saleUnit } = body;
+        const { name, price, image, saleUnit, code: rawCode } = body;
+        const amount = price === undefined ? undefined : typeof price === "number" ? price : parseFloat(price);
+        if (amount !== undefined && (!Number.isFinite(amount) || amount < 0)) {
+            return NextResponse.json({ error: "Invalid price" }, { status: 400 });
+        }
+
+        const updates: {
+            name?: string;
+            price?: number;
+            image?: string | null;
+            saleUnit?: SaleUnit;
+            code?: string;
+            updatedAt: ReturnType<typeof nowTimestamp>;
+        } = { updatedAt: nowTimestamp() };
+
+        if (name) updates.name = name;
+        if (amount !== undefined) updates.price = roundMoney(amount);
+        if (image !== undefined) updates.image = image;
+        if (saleUnit) updates.saleUnit = saleUnit as SaleUnit;
+
+        if (rawCode !== undefined) {
+            const normalized = normalizeProductCode(
+                typeof rawCode === "string" ? rawCode : "",
+            );
+            if (!normalized || !isValidProductCode(normalized)) {
+                return NextResponse.json(
+                    { error: "Code must be alphanumeric (letters, numbers, - or _)" },
+                    { status: 400 },
+                );
+            }
+
+            const existing = await db.orm.public.Product.where({ code: normalized }).first();
+            if (existing && existing.id !== productId) {
+                return NextResponse.json(
+                    { error: "Product code already exists" },
+                    { status: 409 },
+                );
+            }
+            updates.code = normalized;
+        }
 
         const product = await db.orm.public.Product
             .where({ id: productId })
-            .update({
-                ...(name && { name }),
-                ...(price !== undefined && { price: parseFloat(price) }),
-                ...(image !== undefined && { image }),
-                ...(saleUnit && { saleUnit: saleUnit as SaleUnit }),
-                updatedAt: nowTimestamp(),
-            });
+            .update(updates);
 
         return NextResponse.json(product);
     } catch (error) {

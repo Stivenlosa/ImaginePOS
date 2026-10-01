@@ -23,11 +23,21 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(homeUrl);
   }
 
+  const adminOnlyApi =
+    pathname.startsWith("/api/users") ||
+    pathname.startsWith("/api/settings") ||
+    pathname.startsWith("/api/registers") ||
+    pathname === "/api/business-day/close" ||
+    pathname === "/api/register-sessions/open" ||
+    (pathname === "/api/business-day" && request.method !== "GET") ||
+    (pathname === "/api/register-sessions/close" && request.method !== "GET");
+
   const needsAdmin =
     pathname === "/settings" ||
     pathname.startsWith("/settings/") ||
-    pathname.startsWith("/api/users") ||
-    pathname.startsWith("/api/settings");
+    pathname === "/registers" ||
+    pathname.startsWith("/registers/") ||
+    adminOnlyApi;
   if (session && needsAdmin && session.role !== "administrador") {
     if (pathname.startsWith("/api/")) {
       return NextResponse.json({ error: "forbidden" }, { status: 403 });

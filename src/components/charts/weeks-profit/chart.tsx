@@ -1,5 +1,6 @@
 "use client";
 
+import { formatMoney } from "@/lib/money";
 import type { ApexOptions } from "apexcharts";
 import dynamic from "next/dynamic";
 
@@ -88,7 +89,7 @@ export function WeeksProfitChart({ data, onDayClick, seriesLabels }: PropsType) 
     },
     yaxis: {
       labels: {
-        formatter: (val: number) => `$${val.toFixed(0)}`,
+        formatter: (val: number) => formatMoney(val),
       },
     },
     legend: {
@@ -104,7 +105,7 @@ export function WeeksProfitChart({ data, onDayClick, seriesLabels }: PropsType) 
     },
     tooltip: {
       y: {
-        formatter: (val: number) => `$${val.toFixed(2)}`,
+        formatter: (val: number) => formatMoney(val),
       },
     },
     fill: {

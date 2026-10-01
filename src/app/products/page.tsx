@@ -7,11 +7,13 @@ import type { Product, SaleUnit } from "@/types/product";
 import { SALE_UNITS } from "@/types/product";
 import { useTranslation } from "@/i18n";
 import { productsApi, type ApiProduct } from "@/lib/api-client";
+import { parseProductsCsv } from "@/lib/parse-products-csv";
 
 // Convert API product to local Product type
 function mapApiProductToProduct(apiProduct: ApiProduct): Product {
     return {
         id: apiProduct.id,
+        code: apiProduct.code,
         name: apiProduct.name,
         price: apiProduct.price,
         image: apiProduct.image,
@@ -35,6 +37,7 @@ function ProductModal({
     t: (key: string) => string;
 }) {
     const [name, setName] = useState(product?.name || "");
+    const [code, setCode] = useState(product?.code || "");
     const [price, setPrice] = useState(product?.price?.toString() || "");
     const [image, setImage] = useState<string | null>(product?.image || null);
     const [saleUnit, setSaleUnit] = useState<SaleUnit>(product?.saleUnit || "unit");
@@ -42,6 +45,7 @@ function ProductModal({
 
     useEffect(() => {
         setName(product?.name || "");
+        setCode(product?.code || "");
         setPrice(product?.price?.toString() || "");
         setImage(product?.image || null);
         setSaleUnit(product?.saleUnit || "unit");
@@ -50,14 +54,14 @@ function ProductModal({
     if (!open) return null;
     
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+        <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
             <div className="bg-white dark:bg-gray-dark rounded-lg p-6 w-full max-w-md relative">
                 <button onClick={onClose} className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 dark:hover:text-dark-6">✕</button>
                 <h2 className="text-lg font-bold mb-4 text-gray-700 dark:text-dark-6">{t("products.editProduct")}</h2>
                 <form onSubmit={async e => { 
                     e.preventDefault(); 
                     if (product) {
-                        await onSave({ ...product, name, price: parseFloat(price), image, saleUnit }); 
+                        await onSave({ ...product, name, code: code.trim(), price: parseFloat(price), image, saleUnit }); 
                     }
                 }} className="flex flex-col gap-3">
                     <input 
@@ -68,8 +72,18 @@ function ProductModal({
                         className="rounded border px-3 py-2 dark:bg-dark-2 dark:border-dark-3 dark:text-dark-6" 
                         disabled={saving}
                     />
+                    <input
+                        type="text"
+                        placeholder={t("products.code")}
+                        value={code}
+                        onChange={e => setCode(e.target.value)}
+                        className="rounded border px-3 py-2 dark:bg-dark-2 dark:border-dark-3 dark:text-dark-6"
+                        disabled={saving}
+                    />
                     <input 
                         type="number" 
+                        min={0}
+                        step="1"
                         placeholder={t("products.price")} 
                         value={price} 
                         onChange={e => setPrice(e.target.value)} 
@@ -128,6 +142,7 @@ function AddProductModule({
     t: (key: string) => string;
 }) {
     const [name, setName] = useState("");
+    const [code, setCode] = useState("");
     const [price, setPrice] = useState("");
     const [image, setImage] = useState<string | null>(null);
     const [saleUnit, setSaleUnit] = useState<SaleUnit>("unit");
@@ -136,8 +151,9 @@ function AddProductModule({
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!name || !price) return;
-        await onAdd({ name, price: parseFloat(price), image, saleUnit });
+        await onAdd({ name, code: code.trim(), price: parseFloat(price), image, saleUnit });
         setName("");
+        setCode("");
         setPrice("");
         setImage(null);
         setSaleUnit("unit");
@@ -155,11 +171,21 @@ function AddProductModule({
                 disabled={adding}
             />
             <input
+                type="text"
+                placeholder={t("products.codeOptional")}
+                value={code}
+                onChange={e => setCode(e.target.value)}
+                className="rounded border px-3 py-2 w-36 dark:bg-dark-2 dark:border-dark-3 dark:text-dark-6"
+                disabled={adding}
+            />
+            <input
                 type="number"
+                min={0}
+                step="1"
                 placeholder={t("products.price")}
                 value={price}
                 onChange={e => setPrice(e.target.value)}
-                className="rounded border px-3 py-2 w-24 dark:bg-dark-2 dark:border-dark-3 dark:text-dark-6"
+                className="rounded border px-3 py-2 w-32 dark:bg-dark-2 dark:border-dark-3 dark:text-dark-6"
                 disabled={adding}
             />
             <select 
@@ -199,14 +225,118 @@ function AddProductModule({
     );
 }
 
+function ImportCsvButton({
+    onImported,
+    importing,
+    setImporting,
+    onError,
+    onMessage,
+    t,
+}: {
+    onImported: (products: Product[]) => void;
+    importing: boolean;
+    setImporting: (value: boolean) => void;
+    onError: (message: string | null) => void;
+    onMessage: (message: string | null) => void;
+    t: (key: string, params?: Record<string, string | number>) => string;
+}) {
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleFile = async (file: File | undefined) => {
+        if (!file) return;
+
+        setImporting(true);
+        onError(null);
+        onMessage(null);
+
+        try {
+            const text = await file.text();
+            const { products, errors } = parseProductsCsv(text);
+
+            if (products.length === 0) {
+                onError(errors[0] || t("products.importEmpty"));
+                return;
+            }
+
+            const response = await productsApi.importMany(
+                products.map(({ name, price, saleUnit, code }) => ({
+                    name,
+                    price,
+                    saleUnit,
+                    code: code || null,
+                    image: null,
+                })),
+            );
+
+            if (response.error) {
+                onError(response.error);
+                return;
+            }
+
+            if (response.data?.created?.length) {
+                onImported(response.data.created.map(mapApiProductToProduct));
+            }
+
+            const createdCount = response.data?.createdCount ?? 0;
+            const importErrors = [
+                ...errors,
+                ...(response.data?.errors ?? []),
+            ];
+
+            if (importErrors.length > 0) {
+                onMessage(
+                    t("products.importPartial", { count: createdCount }),
+                );
+                onError(importErrors.slice(0, 5).join(" · "));
+            } else {
+                onMessage(t("products.importSuccess", { count: createdCount }));
+            }
+        } catch (error) {
+            onError(
+                error instanceof Error
+                    ? error.message
+                    : t("products.importEmpty"),
+            );
+        } finally {
+            setImporting(false);
+            if (fileInputRef.current) fileInputRef.current.value = "";
+        }
+    };
+
+    return (
+        <div className="flex flex-wrap items-center gap-2 mb-4">
+            <input
+                ref={fileInputRef}
+                type="file"
+                accept=".csv,text/csv"
+                className="hidden"
+                onChange={(e) => handleFile(e.target.files?.[0])}
+            />
+            <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={importing}
+                className="rounded border border-primary px-4 py-2 text-primary hover:bg-primary/10 transition disabled:opacity-50"
+            >
+                {importing ? t("products.importing") : t("products.importCsv")}
+            </button>
+            <span className="text-sm text-gray-500 dark:text-dark-5">
+                {t("products.importHint")}
+            </span>
+        </div>
+    );
+}
+
 export default function ProductsManager() {
     const [products, setProducts] = useState<Product[]>([]);
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
     const [modalOpen, setModalOpen] = useState(false);
     const [loading, setLoading] = useState(true);
     const [adding, setAdding] = useState(false);
+    const [importing, setImporting] = useState(false);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [filterName, setFilterName] = useState("");
     const { t } = useTranslation();
 
@@ -242,6 +372,7 @@ export default function ProductsManager() {
             price: product.price,
             image: product.image,
             saleUnit: product.saleUnit,
+            code: product.code || null,
         });
 
         if (response.error) {
@@ -270,6 +401,7 @@ export default function ProductsManager() {
             price: updated.price,
             image: updated.image,
             saleUnit: updated.saleUnit,
+            code: updated.code,
         });
 
         if (response.error) {
@@ -315,15 +447,30 @@ export default function ProductsManager() {
                         <UserInfo />
                     </div>
                     
-                    {/* Error message */}
+                    {/* Error / success messages */}
                     {error && (
                         <div className="bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-lg">
                             {error}
                         </div>
                     )}
+                    {successMessage && (
+                        <div className="bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400 p-3 rounded-lg">
+                            {successMessage}
+                        </div>
+                    )}
                     
                     {/* Add Product Module */}
                     <AddProductModule onAdd={handleAddProduct} adding={adding} t={t} />
+                    <ImportCsvButton
+                        importing={importing}
+                        setImporting={setImporting}
+                        onError={setError}
+                        onMessage={setSuccessMessage}
+                        onImported={(imported) =>
+                            setProducts((prev) => [...imported, ...prev])
+                        }
+                        t={t}
+                    />
                     
                     {/* Product List - pass products directly so it doesn't fetch again */}
                     {loading ? (
