@@ -1,10 +1,20 @@
 "use client";
-import { useState, useRef } from "react";
-import { useCart } from "./cart-context";
+import { useState, useRef, useEffect } from "react";
+import { useCart, type SavedCart } from "./cart-context";
 import { getSaleUnitSuffix, isWeightBasedUnit, calculateItemTotal, CartItem } from "@/types/product";
 import { useTranslation } from "@/i18n";
 
 type PaymentType = "cash" | "card" | "transfer";
+
+function formatSavedAgo(savedAt: number): string {
+    const seconds = Math.max(0, Math.floor((Date.now() - savedAt) / 1000));
+    if (seconds < 60) return `${seconds}s`;
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}min`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h`;
+    return `${Math.floor(hours / 24)}d`;
+}
 
 // Simulated scale API - in production this would connect to a real scale
 function useScaleWeight() {
@@ -78,6 +88,111 @@ function TransferIcon({ className }: { className?: string }) {
             <path d="M7 23l-4-4 4-4" />
             <path d="M21 13v2a4 4 0 0 1-4 4H3" />
         </svg>
+    );
+}
+
+function BookmarkIcon({ className }: { className?: string }) {
+    return (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+        </svg>
+    );
+}
+
+function FolderIcon({ className }: { className?: string }) {
+    return (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+        </svg>
+    );
+}
+
+// Saved carts modal (session-only)
+interface SavedCartsModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    savedCarts: SavedCart[];
+    onRestore: (id: string) => void;
+    onDelete: (id: string) => void;
+    t: (key: string, params?: Record<string, string | number>) => string;
+}
+
+function SavedCartsModal({ isOpen, onClose, savedCarts, onRestore, onDelete, t }: SavedCartsModalProps) {
+    const [, setTick] = useState(0);
+
+    useEffect(() => {
+        if (!isOpen) return;
+        const interval = setInterval(() => setTick((n) => n + 1), 30_000);
+        return () => clearInterval(interval);
+    }, [isOpen]);
+
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-gray-dark rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-hidden flex flex-col">
+                <div className="bg-green-600 text-white p-6 text-center">
+                    <h2 className="text-xl font-bold">{t("cart.savedCartsTitle")}</h2>
+                </div>
+
+                <div className="flex-1 overflow-y-auto p-6">
+                    {savedCarts.length === 0 ? (
+                        <p className="text-center text-gray-400 dark:text-dark-5 py-8">
+                            {t("cart.noSavedCarts")}
+                        </p>
+                    ) : (
+                        <div className="space-y-3">
+                            {savedCarts.map((saved) => (
+                                <div
+                                    key={saved.id}
+                                    className="p-4 bg-purple-50 dark:bg-dark-3 rounded-xl"
+                                >
+                                    <div className="flex justify-between items-start mb-3">
+                                        <div>
+                                            <p className="font-medium text-gray-800 dark:text-white">
+                                                {t("cart.savedAgo", { time: formatSavedAgo(saved.savedAt) })}
+                                            </p>
+                                            <p className="text-sm text-gray-500 dark:text-dark-5">
+                                                {t("cart.itemsCount", { count: saved.items.length })}
+                                            </p>
+                                        </div>
+                                        <p className="font-bold text-green-600 text-lg">
+                                            ${saved.total.toFixed(2)}
+                                        </p>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => {
+                                                onRestore(saved.id);
+                                                onClose();
+                                            }}
+                                            className="flex-1 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-500 transition"
+                                        >
+                                            {t("cart.useCart")}
+                                        </button>
+                                        <button
+                                            onClick={() => onDelete(saved.id)}
+                                            className="px-4 py-2 text-sm bg-red-500 text-white rounded-lg hover:bg-red-400 transition"
+                                        >
+                                            {t("common.delete")}
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                <div className="p-6 border-t dark:border-dark-4 bg-gray-50 dark:bg-dark-2">
+                    <button
+                        onClick={onClose}
+                        className="w-full py-3 bg-gray-200 dark:bg-dark-3 text-gray-700 dark:text-dark-6 rounded-xl hover:bg-gray-300 dark:hover:bg-dark-4 transition"
+                    >
+                        {t("common.close")}
+                    </button>
+                </div>
+            </div>
+        </div>
     );
 }
 
@@ -355,7 +470,11 @@ export default function CartSummary() {
         clearCart, 
         pendingWeightProduct, 
         setPendingWeightProduct,
-        addToCart 
+        addToCart,
+        savedCarts,
+        saveCart,
+        restoreCart,
+        deleteSavedCart,
     } = useCart();
     
     const { weight, setWeight, isConnected, simulateScaleReading } = useScaleWeight();
@@ -364,6 +483,7 @@ export default function CartSummary() {
     
     // Checkout state
     const [showPaymentModal, setShowPaymentModal] = useState(false);
+    const [showSavedCarts, setShowSavedCarts] = useState(false);
     const [showReceipt, setShowReceipt] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
     const [completedOrder, setCompletedOrder] = useState<{
@@ -627,23 +747,55 @@ export default function CartSummary() {
                         <span className="text-green-600 font-bold text-lg">${total.toFixed(2)}</span>
                     </div>
                 </div>
-                <div className="flex gap-2">
-                    <button
-                        onClick={clearCart}
-                        disabled={cart.length === 0}
-                        className="flex-1 py-3 bg-gray-200 dark:bg-dark-3 text-gray-700 dark:text-dark-6 rounded-xl hover:bg-gray-300 dark:hover:bg-dark-4 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        {t("common.clear")}
-                    </button>
+                <div className="space-y-2">
                     <button 
                         onClick={handleCheckout}
                         disabled={cart.length === 0}
-                        className="flex-1 py-3 bg-green-600 text-white rounded-xl hover:bg-green-500 transition shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full py-4 text-lg font-semibold bg-green-600 text-white rounded-xl hover:bg-green-500 transition shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {t("common.checkout")}
                     </button>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={saveCart}
+                            disabled={cart.length === 0}
+                            className="flex-1 py-2.5 text-sm bg-blue-600 text-white rounded-xl hover:bg-blue-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        >
+                            <BookmarkIcon className="w-4 h-4" />
+                            {t("cart.saveCart")}
+                        </button>
+                        <button
+                            onClick={() => setShowSavedCarts(true)}
+                            className="flex-1 py-2.5 text-sm bg-gray-200 dark:bg-dark-3 text-gray-700 dark:text-dark-6 rounded-xl hover:bg-gray-300 dark:hover:bg-dark-4 transition flex items-center justify-center gap-2 relative"
+                        >
+                            <FolderIcon className="w-4 h-4" />
+                            {t("cart.savedCarts")}
+                            {savedCarts.length > 0 && (
+                                <span className="absolute -top-1.5 -right-1.5 min-w-5 h-5 px-1 rounded-full bg-green-600 text-white text-xs font-bold flex items-center justify-center">
+                                    {savedCarts.length}
+                                </span>
+                            )}
+                        </button>
+                        <button
+                            onClick={clearCart}
+                            disabled={cart.length === 0}
+                            className="px-4 py-2.5 text-sm bg-gray-200 dark:bg-dark-3 text-gray-700 dark:text-dark-6 rounded-xl hover:bg-gray-300 dark:hover:bg-dark-4 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {t("common.clear")}
+                        </button>
+                    </div>
                 </div>
             </div>
+
+            {/* Saved Carts Modal */}
+            <SavedCartsModal
+                isOpen={showSavedCarts}
+                onClose={() => setShowSavedCarts(false)}
+                savedCarts={savedCarts}
+                onRestore={restoreCart}
+                onDelete={deleteSavedCart}
+                t={t}
+            />
 
             {/* Payment Type Modal */}
             <PaymentModal

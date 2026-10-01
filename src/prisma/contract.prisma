@@ -16,6 +16,11 @@ native_enum PaymentType {
   transfer = "transfer"
 }
 
+native_enum UserRole {
+  administrador = "administrador"
+  cajero        = "cajero"
+}
+
 // Timestamps are timestamp(3) without time zone, holding UTC wall-clock values (Prisma 7 layout).
 model Product {
   id        Int               @id(map: "products_pkey") @default(autoincrement())
@@ -63,4 +68,18 @@ model PurchaseDetail {
   product  Product  @relation(fields: [productId], references: [id], onDelete: Restrict, onUpdate: Cascade, map: "purchase_details_productId_fkey", index: false)
 
   @@map("purchase_details")
+}
+
+model User {
+  id           Int                @id(map: "users_pkey") @default(autoincrement())
+  name         String
+  username     String
+  passwordHash String
+  role         pg.enum(UserRole)
+  active       Boolean            @default(true)
+  createdAt    Timestamp(3)       @default(now())
+  updatedAt    Timestamp(3)
+
+  @@index([username], map: "users_username_key", unique: true)
+  @@map("users")
 }

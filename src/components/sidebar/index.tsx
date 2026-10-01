@@ -10,12 +10,24 @@ import {ArrowLeftIcon, ChevronUp, HamburgerMenu} from "./icons";
 import {MenuItem} from "./menu-item";
 import {useSidebarContext} from "./sidebar-context";
 import {useTranslation} from "@/i18n";
+import {useAuth} from "@/components/auth/auth-context";
+import type {UserRole} from "@/types/user";
 
 export function Sidebar() {
     const pathname = usePathname();
     const {setIsOpen, isOpen, isMobile, toggleSidebar} = useSidebarContext();
     const [expandedItems, setExpandedItems] = useState<string[]>([]);
     const {t} = useTranslation();
+    const {user} = useAuth();
+    const role = user?.role;
+
+    const sections = NAV_DATA.map((section) => ({
+        ...section,
+        items: section.items.filter((item) => {
+            const roles = "roles" in item ? (item.roles as UserRole[] | undefined) : undefined;
+            return !roles?.length || (role ? roles.includes(role) : false);
+        }),
+    })).filter((section) => section.items.length > 0);
 
     const toggleExpanded = (titleKey: string) => {
         setExpandedItems((prev) => (prev.includes(titleKey) ? [] : [titleKey]));
@@ -108,7 +120,7 @@ export function Sidebar() {
 
                     {/* Navigation */}
                     <div className="custom-scrollbar mt-6 flex-1 overflow-y-auto pr-3 min-[850px]:mt-10">
-                        {NAV_DATA.map((section) => (
+                        {sections.map((section) => (
                             <div key={section.labelKey} className="mb-6">
                                 <h2 className="mb-5 text-sm font-medium text-dark-4 dark:text-dark-6">
                                     {t(section.labelKey)}
@@ -163,29 +175,19 @@ export function Sidebar() {
                                                         )}
                                                     </div>
                                                 ) : (
-                                                    (() => {
-                                                        const href =
-                                                            "url" in item
-                                                                ? item.url + ""
-                                                                : "/" +
-                                                                t(item.titleKey).toLowerCase().split(" ").join("-");
+                                                    <MenuItem
+                                                        className="flex items-center gap-3 py-3"
+                                                        as="link"
+                                                        href={item.url}
+                                                        isActive={pathname === item.url}
+                                                    >
+                                                        <item.icon
+                                                            className="size-6 shrink-0"
+                                                            aria-hidden="true"
+                                                        />
 
-                                                        return (
-                                                            <MenuItem
-                                                                className="flex items-center gap-3 py-3"
-                                                                as="link"
-                                                                href={href}
-                                                                isActive={pathname === href}
-                                                            >
-                                                                <item.icon
-                                                                    className="size-6 shrink-0"
-                                                                    aria-hidden="true"
-                                                                />
-
-                                                                <span>{t(item.titleKey)}</span>
-                                                            </MenuItem>
-                                                        );
-                                                    })()
+                                                        <span>{t(item.titleKey)}</span>
+                                                    </MenuItem>
                                                 )}
                                             </li>
                                         ))}

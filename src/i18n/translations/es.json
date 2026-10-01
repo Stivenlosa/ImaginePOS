@@ -28,6 +28,50 @@
         "language": "Idioma",
         "selectLanguage": "Seleccionar Idioma"
     },
+    "login": {
+        "title": "Iniciar sesión",
+        "subtitle": "Imagine POS",
+        "username": "Usuario",
+        "password": "Contraseña",
+        "submit": "Entrar",
+        "submitting": "Entrando...",
+        "invalid": "Usuario o contraseña incorrectos",
+        "inactive": "Esta cuenta está inactiva"
+    },
+    "settings": {
+        "title": "Configuración",
+        "subtitle": "Administra quién puede usar la caja",
+        "users": "Usuarios",
+        "newUser": "Nuevo usuario",
+        "editUser": "Editar usuario",
+        "name": "Nombre",
+        "username": "Usuario",
+        "password": "Contraseña",
+        "passwordHint": "Déjalo en blanco para conservar la contraseña",
+        "role": "Perfil",
+        "status": "Estado",
+        "active": "Activo",
+        "inactive": "Inactivo",
+        "actions": "Acciones",
+        "deactivate": "Desactivar",
+        "activate": "Activar",
+        "confirmDelete": "¿Eliminar este usuario?",
+        "empty": "Todavía no hay usuarios",
+        "roles": {
+            "administrador": "Administrador",
+            "cajero": "Cajero"
+        },
+        "errors": {
+            "username_taken": "Ese usuario ya está en uso",
+            "invalid_username": "Usa de 3 a 32 letras, números, puntos, guiones o guiones bajos",
+            "invalid_password": "La contraseña debe tener al menos 6 caracteres",
+            "invalid_name": "El nombre es obligatorio",
+            "invalid_role": "Elige Administrador o Cajero",
+            "last_admin": "El sistema necesita al menos un Administrador activo",
+            "self_delete": "No puedes eliminar tu propia cuenta",
+            "self_deactivate": "No puedes desactivar tu propia cuenta"
+        }
+    },
     "cart": {
         "title": "Carrito",
         "empty": "El carrito está vacío",
@@ -37,7 +81,14 @@
         "manualWeight": "Peso manual",
         "read": "Leer",
         "weighing": "Pesando",
-        "remove": "Quitar"
+        "remove": "Quitar",
+        "saveCart": "Guardar",
+        "savedCarts": "Traer",
+        "savedCartsTitle": "Carritos guardados",
+        "noSavedCarts": "No hay carritos guardados",
+        "savedAgo": "Guardado hace {{time}}",
+        "useCart": "Usar",
+        "itemsCount": "{{count}} artículos"
     },
     "checkout": {
         "receipt": "Recibo",

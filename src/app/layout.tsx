@@ -1,7 +1,7 @@
 import "@/css/satoshi.css";
 import "@/css/style.css";
 
-import {Sidebar} from "@/components/sidebar";
+import { AppFrame } from "@/components/app-frame";
 
 import "flatpickr/dist/flatpickr.min.css";
 import "jsvectormap/dist/jsvectormap.css";
@@ -27,16 +27,7 @@ export default function RootLayout({children}: PropsWithChildren) {
         <body>
         <Providers>
             <NextTopLoader color="#5750F1" showSpinner={false}/>
-
-            <div className="flex min-h-screen">
-                <Sidebar/>
-
-                <div className="w-full bg-gray-2 dark:bg-[#020d1a]">
-                    <main className="isolate mx-auto w-full max-w-screen-3xl overflow-hidden p-4 md:p-6 2xl:p-10">
-                        {children}
-                    </main>
-                </div>
-            </div>
+            <AppFrame>{children}</AppFrame>
         </Providers>
         </body>
         </html>

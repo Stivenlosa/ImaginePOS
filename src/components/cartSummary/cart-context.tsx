@@ -1,7 +1,14 @@
 "use client";
 import { createContext, useContext, useState, ReactNode } from "react";
 import type { Product, CartItem } from "@/types/product";
-import { isWeightBasedUnit } from "@/types/product";
+import { isWeightBasedUnit, calculateItemTotal } from "@/types/product";
+
+export type SavedCart = {
+    id: string;
+    savedAt: number;
+    items: CartItem[];
+    total: number;
+};
 
 type CartContextType = {
     cart: CartItem[];
@@ -11,12 +18,26 @@ type CartContextType = {
     clearCart: () => void;
     pendingWeightProduct: Product | null;
     setPendingWeightProduct: (product: Product | null) => void;
+    savedCarts: SavedCart[];
+    saveCart: () => void;
+    restoreCart: (id: string) => void;
+    deleteSavedCart: (id: string) => void;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+function createSavedCart(items: CartItem[]): SavedCart {
+    return {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        savedAt: Date.now(),
+        items: items.map((item) => ({ ...item })),
+        total: items.reduce((sum, item) => sum + calculateItemTotal(item), 0),
+    };
+}
+
 export function CartProvider({ children }: { children: ReactNode }) {
     const [cart, setCart] = useState<CartItem[]>([]);
+    const [savedCarts, setSavedCarts] = useState<SavedCart[]>([]);
     const [pendingWeightProduct, setPendingWeightProduct] = useState<Product | null>(null);
 
     const addToCart = (product: Product, weight?: number) => {
@@ -65,6 +86,32 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
     const clearCart = () => setCart([]);
 
+    const saveCart = () => {
+        if (cart.length === 0) return;
+        setSavedCarts((prev) => [createSavedCart(cart), ...prev]);
+        setCart([]);
+        setPendingWeightProduct(null);
+    };
+
+    const restoreCart = (id: string) => {
+        const saved = savedCarts.find((entry) => entry.id === id);
+        if (!saved) return;
+
+        setSavedCarts((prev) => {
+            const withoutRestored = prev.filter((entry) => entry.id !== id);
+            if (cart.length > 0) {
+                return [createSavedCart(cart), ...withoutRestored];
+            }
+            return withoutRestored;
+        });
+        setCart(saved.items.map((item) => ({ ...item })));
+        setPendingWeightProduct(null);
+    };
+
+    const deleteSavedCart = (id: string) => {
+        setSavedCarts((prev) => prev.filter((entry) => entry.id !== id));
+    };
+
     return (
         <CartContext.Provider value={{ 
             cart, 
@@ -73,7 +120,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
             updateItemWeight,
             clearCart,
             pendingWeightProduct,
-            setPendingWeightProduct
+            setPendingWeightProduct,
+            savedCarts,
+            saveCart,
+            restoreCart,
+            deleteSavedCart,
         }}>
             {children}
         </CartContext.Provider>

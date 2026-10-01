@@ -1,7 +1,9 @@
 import "dotenv/config";
+import { hashPassword } from "../src/lib/password";
 import { nowTimestamp } from "../src/prisma/dates";
 import { closeDb, db } from "../src/prisma/db";
 import type { SaleUnit } from "../src/types/product";
+import type { UserRole } from "../src/types/user";
 
 // Spanish product data for POS system
 const spanishProducts: { name: string; price: number; saleUnit: SaleUnit }[] = [
@@ -31,6 +33,11 @@ const spanishProducts: { name: string; price: number; saleUnit: SaleUnit }[] = [
     { name: "Aceitunas", price: 5.00, saleUnit: "kg" },
 ];
 
+const seedUsers: { name: string; username: string; password: string; role: UserRole }[] = [
+    { name: "Administrador", username: "admin", password: "admin123", role: "administrador" },
+    { name: "Ana Caja", username: "ana", password: "caja123", role: "cajero" },
+];
+
 async function main() {
     console.log("🌱 Starting database seed...");
 
@@ -43,6 +50,24 @@ async function main() {
     );
 
     console.log(`✅ Seeded ${spanishProducts.length} Spanish products`);
+
+    for (const user of seedUsers) {
+        const existing = await db.orm.public.User.where({ username: user.username }).first();
+        if (existing) {
+            console.log(`✅ User already exists: ${user.username} (${user.role})`);
+            continue;
+        }
+
+        await db.orm.public.User.create({
+            name: user.name,
+            username: user.username,
+            passwordHash: await hashPassword(user.password),
+            role: user.role,
+            active: true,
+            updatedAt,
+        });
+        console.log(`✅ Seeded user: ${user.username} (${user.role})`);
+    }
 }
 
 main()

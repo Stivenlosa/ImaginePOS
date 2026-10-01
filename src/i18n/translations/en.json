@@ -28,6 +28,50 @@
         "language": "Language",
         "selectLanguage": "Select Language"
     },
+    "login": {
+        "title": "Sign in",
+        "subtitle": "Imagine POS",
+        "username": "Username",
+        "password": "Password",
+        "submit": "Sign in",
+        "submitting": "Signing in...",
+        "invalid": "Invalid username or password",
+        "inactive": "This account is inactive"
+    },
+    "settings": {
+        "title": "Settings",
+        "subtitle": "Manage who can use the register",
+        "users": "Users",
+        "newUser": "New user",
+        "editUser": "Edit user",
+        "name": "Name",
+        "username": "Username",
+        "password": "Password",
+        "passwordHint": "Leave blank to keep the current password",
+        "role": "Profile",
+        "status": "Status",
+        "active": "Active",
+        "inactive": "Inactive",
+        "actions": "Actions",
+        "deactivate": "Deactivate",
+        "activate": "Activate",
+        "confirmDelete": "Delete this user?",
+        "empty": "No users yet",
+        "roles": {
+            "administrador": "Administrador",
+            "cajero": "Cajero"
+        },
+        "errors": {
+            "username_taken": "That username is already in use",
+            "invalid_username": "Use 3–32 letters, numbers, dots, dashes, or underscores",
+            "invalid_password": "Password must be at least 6 characters",
+            "invalid_name": "Name is required",
+            "invalid_role": "Choose Administrador or Cajero",
+            "last_admin": "The system needs at least one active Administrador",
+            "self_delete": "You cannot delete your own account",
+            "self_deactivate": "You cannot deactivate your own account"
+        }
+    },
     "cart": {
         "title": "Cart",
         "empty": "Cart is empty",
@@ -37,7 +81,14 @@
         "manualWeight": "Manual weight",
         "read": "Read",
         "weighing": "Weighing",
-        "remove": "Remove"
+        "remove": "Remove",
+        "saveCart": "Save",
+        "savedCarts": "Bring",
+        "savedCartsTitle": "Saved carts",
+        "noSavedCarts": "No saved carts",
+        "savedAgo": "Saved {{time}} ago",
+        "useCart": "Use",
+        "itemsCount": "{{count}} items"
     },
     "checkout": {
         "receipt": "Receipt",

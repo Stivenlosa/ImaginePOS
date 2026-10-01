@@ -9,45 +9,27 @@ export const NAV_DATA = [
       {
         titleKey: "navigation.sales",
         icon: Icons.CurrentCartIcon,
-        items: [],
+        items: [] as { titleKey: string; url: string }[],
         url: "/",
       },
       {
         titleKey: "navigation.products",
         icon: Icons.FourCircle,
-        items: [],
+        items: [] as { titleKey: string; url: string }[],
         url: "/products",
       },
       {
         titleKey: "navigation.reports",
         icon: Icons.PieChart,
-        items: [],
+        items: [] as { titleKey: string; url: string }[],
         url: "/reports",
       },
       {
-        titleKey: "navigation.pages",
-        icon: Icons.Alphabet,
-        items: [
-          {
-            titleKey: "navigation.settings",
-            url: "/pages/settings",
-          },
-        ],
-      },
-    ],
-  },
-  {
-    labelKey: "navigation.others",
-    items: [
-      {
-        titleKey: "navigation.authentication",
-        icon: Icons.Authentication,
-        items: [
-          {
-            titleKey: "navigation.signIn",
-            url: "/auth/sign-in",
-          },
-        ],
+        titleKey: "navigation.settings",
+        icon: Icons.User,
+        items: [] as { titleKey: string; url: string }[],
+        url: "/settings",
+        roles: ["administrador"],
       },
     ],
   },

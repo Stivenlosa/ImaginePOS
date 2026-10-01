@@ -8,21 +8,30 @@ import {
 } from "@/components/ui/dropdown";
 import { cn } from "@/lib/utils";
 import { useLanguage, LANGUAGES, type LanguageCode } from "@/i18n";
-import Image from "next/image";
+import { useAuth } from "@/components/auth/auth-context";
 import Link from "next/link";
 import { useState } from "react";
 import { LogOutIcon, SettingsIcon, UserIcon, LanguageIcon } from "./icons";
+
+function initials(name: string) {
+  return (
+    name
+      .split(" ")
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase())
+      .join("") || "?"
+  );
+}
 
 export function UserInfo() {
   const [isOpen, setIsOpen] = useState(false);
   const [showLanguageSelector, setShowLanguageSelector] = useState(false);
   const { language, setLanguage, t } = useLanguage();
+  const { user, logout } = useAuth();
 
-  const USER = {
-    name: "Stiven Lopez",
-    email: "johnson@nextadmin.com",
-    img: "/images/user/user-05.png",
-  };
+  const displayName = user?.name ?? "";
+  const roleLabel = user ? t(`settings.roles.${user.role}`) : "";
 
   const handleLanguageChange = (lang: LanguageCode) => {
     setLanguage(lang);
@@ -35,16 +44,11 @@ export function UserInfo() {
         <span className="sr-only">{t("userInfo.myAccount")}</span>
 
         <figure className="flex items-center gap-3">
-          <Image
-            src={USER.img}
-            className="size-12"
-            alt={`Avatar of ${USER.name}`}
-            role="presentation"
-            width={200}
-            height={200}
-          />
+          <span className="flex size-12 items-center justify-center rounded-full bg-primary text-sm font-semibold text-white">
+            {initials(displayName)}
+          </span>
           <figcaption className="flex items-center gap-1 font-medium text-dark dark:text-dark-6 max-[1024px]:sr-only">
-            <span>{USER.name}</span>
+            <span>{displayName}</span>
 
             <ChevronUpIcon
               aria-hidden
@@ -65,21 +69,16 @@ export function UserInfo() {
         <h2 className="sr-only">{t("userInfo.userInformation")}</h2>
 
         <figure className="flex items-center gap-2.5 px-5 py-3.5">
-          <Image
-            src={USER.img}
-            className="size-12"
-            alt={`Avatar for ${USER.name}`}
-            role="presentation"
-            width={200}
-            height={200}
-          />
+          <span className="flex size-12 items-center justify-center rounded-full bg-primary text-sm font-semibold text-white">
+            {initials(displayName)}
+          </span>
 
           <figcaption className="space-y-1 text-base font-medium">
             <div className="mb-2 leading-none text-dark dark:text-white">
-              {USER.name}
+              {displayName}
             </div>
 
-            <div className="leading-none text-gray-6">{USER.email}</div>
+            <div className="leading-none text-gray-6">{roleLabel}</div>
           </figcaption>
         </figure>
 
@@ -96,17 +95,19 @@ export function UserInfo() {
             <span className="mr-auto text-base font-medium">{t("userInfo.viewProfile")}</span>
           </Link>
 
-          <Link
-            href={"/pages/settings"}
-            onClick={() => setIsOpen(false)}
-            className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-[9px] hover:bg-gray-2 hover:text-dark dark:hover:bg-dark-3 dark:hover:text-white"
-          >
-            <SettingsIcon />
+          {user?.role === "administrador" && (
+            <Link
+              href={"/settings"}
+              onClick={() => setIsOpen(false)}
+              className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-[9px] hover:bg-gray-2 hover:text-dark dark:hover:bg-dark-3 dark:hover:text-white"
+            >
+              <SettingsIcon />
 
-            <span className="mr-auto text-base font-medium">
-              {t("userInfo.accountSettings")}
-            </span>
-          </Link>
+              <span className="mr-auto text-base font-medium">
+                {t("navigation.settings")}
+              </span>
+            </Link>
+          )}
 
           {/* Language Selector */}
           <div className="relative">
@@ -166,7 +167,10 @@ export function UserInfo() {
         <div className="p-2 text-base text-[#4B5563] dark:text-dark-6">
           <button
             className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-[9px] hover:bg-gray-2 hover:text-dark dark:hover:bg-dark-3 dark:hover:text-white"
-            onClick={() => setIsOpen(false)}
+            onClick={() => {
+              setIsOpen(false);
+              void logout();
+            }}
           >
             <LogOutIcon />
 
