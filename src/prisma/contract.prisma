@@ -21,6 +21,11 @@ native_enum UserRole {
   cajero        = "cajero"
 }
 
+native_enum TransferStatus {
+  pending   = "pending"
+  validated = "validated"
+}
+
 // Timestamps are timestamp(3) without time zone, holding UTC wall-clock values (Prisma 7 layout).
 model Product {
   id        Int               @id(map: "products_pkey") @default(autoincrement())
@@ -42,14 +47,63 @@ model Purchase {
   subtotal    Float
   tax         Float
   total       Float
-  paymentType pg.enum(PaymentType)
-  createdAt   Timestamp(3)         @default(now())
-  updatedAt   Timestamp(3)
+  paymentType       pg.enum(PaymentType)
+  transferStatus    pg.enum(TransferStatus)?
+  payerName         String?
+  validatedAt       Timestamp(3)?
+  transferMessageId String?
+  createdAt         Timestamp(3)         @default(now())
+  updatedAt         Timestamp(3)
 
   details PurchaseDetail[]
 
   @@index([orderNumber], map: "purchases_orderNumber_key", unique: true)
+  @@index([transferMessageId], map: "purchases_transferMessageId_key", unique: true)
   @@map("purchases")
+}
+
+// One row holds the Gmail inbox and the bank key used to confirm transfers.
+model TransferConfig {
+  id                 Int          @id(map: "transfer_configs_pkey") @default(autoincrement())
+  gmailAddress       String
+  gmailAppPassword   String
+  llave              String
+  timeWindowMinutes  Int          @default(60)
+  updatedAt          Timestamp(3)
+
+  @@map("transfer_configs")
+}
+
+// Every bank email that matched the transfer sentence.
+model BankTransfer {
+  id          Int          @id(map: "bank_transfers_pkey") @default(autoincrement())
+  messageId   String
+  payerName   String
+  amount      Float
+  account     String
+  llave       String
+  occurredAt  Timestamp(3)
+  announcedAt Timestamp(3)?
+  purchaseId  Int?
+  createdAt   Timestamp(3) @default(now())
+
+  purchase Purchase? @relation(fields: [purchaseId], references: [id], onDelete: SetNull, onUpdate: Cascade, map: "bank_transfers_purchaseId_fkey", index: false)
+
+  @@index([messageId], map: "bank_transfers_messageId_key", unique: true)
+  @@index([purchaseId], map: "bank_transfers_purchaseId_key", unique: true)
+  @@map("bank_transfers")
+}
+
+// One row per bank email already spoken on the sales screen.
+model AnnouncedTransfer {
+  id        Int          @id(map: "announced_transfers_pkey") @default(autoincrement())
+  messageId String
+  payerName String
+  amount    Float
+  createdAt Timestamp(3) @default(now())
+
+  @@index([messageId], map: "announced_transfers_messageId_key", unique: true)
+  @@map("announced_transfers")
 }
 
 model PurchaseDetail {

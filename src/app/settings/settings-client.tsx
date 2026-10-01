@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/table";
 import { useTranslation } from "@/i18n";
 import { USER_ROLES, type PublicUser, type UserRole } from "@/types/user";
+import { TransferSettings } from "./transfer-settings";
 
 type Draft = {
   id: number | null;
@@ -140,6 +141,8 @@ export function SettingsClient() {
         </div>
         <UserInfo />
       </div>
+
+      <TransferSettings />
 
       <section className="rounded-xl border border-stroke bg-white p-5 shadow-card-2 dark:border-dark-3 dark:bg-gray-dark">
         <div className="mb-4 flex items-center justify-between gap-3">

@@ -70,6 +70,23 @@
             "last_admin": "The system needs at least one active Administrador",
             "self_delete": "You cannot delete your own account",
             "self_deactivate": "You cannot deactivate your own account"
+        },
+        "transfer": {
+            "title": "Transfer email",
+            "subtitle": "ImaginePOS reads this Gmail account and confirms a sale when the bank reports a payment with the same key.",
+            "email": "Google email",
+            "password": "App password",
+            "passwordHint": "Leave blank to keep the current password",
+            "llave": "Key (llave)",
+            "window": "Allowed time difference (minutes)",
+            "help": "Google rejects the normal account password. Create an app password (16 letters) under Google Account, Security, 2-Step Verification, App passwords, and turn IMAP on in Gmail. A notice like “recibiste una transferencia de JORDAN LOPEZ por $200.00 … llave @jordan751 el 30/09/26 a las 22:54” is read aloud on Sales for every message with that shape.",
+            "saved": "Settings saved",
+            "errors": {
+                "invalid_email": "Enter a valid Google email",
+                "invalid_llave": "The key is required",
+                "invalid_window": "The window must be between 5 and 240 minutes",
+                "invalid_password": "Use the 16-character Google app password, not your normal password"
+            }
         }
     },
     "cart": {
@@ -108,6 +125,25 @@
         "paymentMethod": "Payment Method",
         "processing": "Processing..."
     },
+    "sales": {
+        "inboxRejected": "Gmail rejected the password. In Settings, save the 16-character app password from Google Account, Security, App passwords.",
+        "inboxUnreachable": "Could not reach Gmail. Sales will keep trying."
+    },
+    "transfers": {
+        "title": "Bank transfers",
+        "recent": "Last transfers from email",
+        "empty": "No transfer emails yet",
+        "when": "Bank time",
+        "payer": "Payer",
+        "amount": "Amount",
+        "account": "Account",
+        "llave": "Key",
+        "purchase": "Sale",
+        "view": "View transfer",
+        "purchaseTitle": "Transfer for this sale",
+        "validatedAt": "Validated at",
+        "notMatched": "No bank email has been matched to this sale yet."
+    },
     "purchases": {
         "order": "Order",
         "date": "Date",
@@ -119,7 +155,20 @@
         "noPurchases": "No purchases yet",
         "item": "item",
         "items": "items",
-        "orderNumber": "Order #{{number}}"
+        "orderNumber": "Order #{{number}}",
+        "title": "Purchases",
+        "validation": "Validation",
+        "pending": "Pending",
+        "validated": "Validated",
+        "markValidated": "Mark validated",
+        "markPending": "Mark pending",
+        "checkEmails": "Check email",
+        "checking": "Checking...",
+        "checkResult": "Validated {{count}} transfers",
+        "checkFailed": "Could not read the inbox. Check the app password.",
+        "invalidCredentials": "Gmail rejected the password. Save the 16-character app password in Settings.",
+        "notConfigured": "Set up the transfer email before checking.",
+        "statusFailed": "Could not change the status"
     },
     "weeklyProfit": {
         "title": "Weekly Sales",

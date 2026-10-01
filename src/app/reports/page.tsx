@@ -1,7 +1,10 @@
 import { WeeksProfit } from "@/components/charts/weeks-profit"
 import { PaymentsOverview } from "@/components/charts/payments-overview/index"
+import { BankTransferTable } from "@/components/tables/bank-transfer-table";
 import { InvoiceTable } from "@/components/tables/invoice-table";
 import { Metadata } from "next"
+import { listBankTransfers } from "@/lib/bank-transfer-store";
+import { getActiveUser } from "@/lib/current-user";
 import { getPaymentsOverviewData, getWeeksProfitData } from "@/services/charts.services";
 import { getInvoiceTableData } from "@/components/tables/fetch";
 
@@ -14,6 +17,8 @@ export default async function Page() {
   const paymentsData = await getPaymentsOverviewData();
   const weeksProfitData = await getWeeksProfitData();
   const invoiceData = await getInvoiceTableData();
+  const user = await getActiveUser();
+  const bankTransfers = user?.role === "administrador" ? await listBankTransfers() : [];
 
   return (
     <>
@@ -28,6 +33,8 @@ export default async function Page() {
           className="col-span-12 xl:col-span-5"
           data={weeksProfitData}
         />
+
+        {user?.role === "administrador" && <BankTransferTable transfers={bankTransfers} />}
 
         <InvoiceTable
           className="col-span-12"

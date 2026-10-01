@@ -148,6 +148,7 @@ export async function getWeeksProfitData() {
           ...p,
           createdAt: timestampToIso(p.createdAt),
           updatedAt: timestampToIso(p.updatedAt),
+          validatedAt: p.validatedAt ? timestampToIso(p.validatedAt) : null,
           details: p.details.map((d) => ({
             ...d,
             createdAt: timestampToIso(d.createdAt),

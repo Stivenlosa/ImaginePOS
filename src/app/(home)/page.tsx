@@ -4,6 +4,7 @@ import { useState } from "react";
 import ProductList from "@/components/product";
 import CartSummary from "@/components/cartSummary";
 import PaymentAnnouncer from "@/components/PaymentAnnouncer/PaymentAnnouncer";
+import { TransferInboxListener } from "@/components/PaymentAnnouncer/transfer-inbox-listener";
 import { SearchIcon } from "@/assets/icons";
 import { UserInfo } from "@/components/header/user-info";
 import { useTranslation } from "@/i18n";
@@ -22,6 +23,7 @@ export default function Sell() {
                 <PaymentAnnouncer />
                 {/* Left side with User + Search + ProductList */}
                 <div className="flex-1 flex flex-col gap-4 min-h-0 overflow-hidden">
+                    <TransferInboxListener />
                     {/* Top bar with User and Search */}
                     <div className="flex justify-between gap-8 shrink-0">
                         {/* Search bar on the right */}

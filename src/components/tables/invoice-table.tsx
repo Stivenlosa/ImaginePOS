@@ -10,6 +10,16 @@ type PurchaseFromDB = {
   tax: number;
   total: number;
   paymentType: PaymentType;
+  transferStatus: "pending" | "validated" | null;
+  payerName: string | null;
+  validatedAt: Temporal.PlainDateTime | null;
+  bankTransfer: {
+    payerName: string;
+    amount: number;
+    account: string;
+    llave: string;
+    occurredAt: Temporal.PlainDateTime;
+  } | null;
   createdAt: Temporal.PlainDateTime;
   updatedAt: Temporal.PlainDateTime;
   details: {
@@ -37,6 +47,16 @@ export function InvoiceTable({ className, purchases }: InvoiceTableProps) {
     ...p,
     createdAt: timestampToIso(p.createdAt),
     updatedAt: timestampToIso(p.updatedAt),
+    validatedAt: p.validatedAt ? timestampToIso(p.validatedAt) : null,
+    bankTransfer: p.bankTransfer
+      ? {
+          payerName: p.bankTransfer.payerName,
+          amount: p.bankTransfer.amount,
+          account: p.bankTransfer.account,
+          llave: p.bankTransfer.llave,
+          occurredAt: timestampToIso(p.bankTransfer.occurredAt),
+        }
+      : null,
     details: p.details.map((d) => ({
       ...d,
       createdAt: timestampToIso(d.createdAt),

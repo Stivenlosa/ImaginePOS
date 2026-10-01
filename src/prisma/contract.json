@@ -4,6 +4,14 @@
   "target": "postgres",
   "profileHash": "3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2",
   "roots": {
+    "announced_transfers": {
+      "model": "AnnouncedTransfer",
+      "namespace": "public"
+    },
+    "bank_transfers": {
+      "model": "BankTransfer",
+      "namespace": "public"
+    },
     "products": {
       "model": "Product",
       "namespace": "public"
@@ -16,6 +24,10 @@
       "model": "Purchase",
       "namespace": "public"
     },
+    "transfer_configs": {
+      "model": "TransferConfig",
+      "namespace": "public"
+    },
     "users": {
       "model": "User",
       "namespace": "public"
@@ -25,6 +37,207 @@
     "namespaces": {
       "public": {
         "models": {
+          "AnnouncedTransfer": {
+            "fields": {
+              "amount": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/float8@1",
+                  "kind": "scalar"
+                }
+              },
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamp-temporal@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "precision": 3
+                  }
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "messageId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "payerName": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {},
+            "storage": {
+              "fields": {
+                "amount": {
+                  "column": "amount"
+                },
+                "createdAt": {
+                  "column": "createdAt"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "messageId": {
+                  "column": "messageId"
+                },
+                "payerName": {
+                  "column": "payerName"
+                }
+              },
+              "namespaceId": "public",
+              "table": "announced_transfers"
+            }
+          },
+          "BankTransfer": {
+            "fields": {
+              "account": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "amount": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/float8@1",
+                  "kind": "scalar"
+                }
+              },
+              "announcedAt": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/timestamp-temporal@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "precision": 3
+                  }
+                }
+              },
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamp-temporal@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "precision": 3
+                  }
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "llave": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "messageId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "occurredAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamp-temporal@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "precision": 3
+                  }
+                }
+              },
+              "payerName": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "purchaseId": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {
+              "purchase": {
+                "cardinality": "N:1",
+                "nullable": true,
+                "on": {
+                  "localFields": [
+                    "purchaseId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Purchase",
+                  "namespace": "public"
+                }
+              }
+            },
+            "storage": {
+              "fields": {
+                "account": {
+                  "column": "account"
+                },
+                "amount": {
+                  "column": "amount"
+                },
+                "announcedAt": {
+                  "column": "announcedAt"
+                },
+                "createdAt": {
+                  "column": "createdAt"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "llave": {
+                  "column": "llave"
+                },
+                "messageId": {
+                  "column": "messageId"
+                },
+                "occurredAt": {
+                  "column": "occurredAt"
+                },
+                "payerName": {
+                  "column": "payerName"
+                },
+                "purchaseId": {
+                  "column": "purchaseId"
+                }
+              },
+              "namespaceId": "public",
+              "table": "bank_transfers"
+            }
+          },
           "Product": {
             "fields": {
               "createdAt": {
@@ -157,6 +370,13 @@
                   "kind": "scalar"
                 }
               },
+              "payerName": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "paymentType": {
                 "nullable": false,
                 "type": {
@@ -188,8 +408,35 @@
                   "kind": "scalar"
                 }
               },
+              "transferMessageId": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "transferStatus": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/enum@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "typeName": "TransferStatus"
+                  }
+                }
+              },
               "updatedAt": {
                 "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamp-temporal@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "precision": 3
+                  }
+                }
+              },
+              "validatedAt": {
+                "nullable": true,
                 "type": {
                   "codecId": "pg/timestamp-temporal@1",
                   "kind": "scalar",
@@ -227,6 +474,9 @@
                 "orderNumber": {
                   "column": "orderNumber"
                 },
+                "payerName": {
+                  "column": "payerName"
+                },
                 "paymentType": {
                   "column": "paymentType"
                 },
@@ -239,8 +489,17 @@
                 "total": {
                   "column": "total"
                 },
+                "transferMessageId": {
+                  "column": "transferMessageId"
+                },
+                "transferStatus": {
+                  "column": "transferStatus"
+                },
                 "updatedAt": {
                   "column": "updatedAt"
+                },
+                "validatedAt": {
+                  "column": "validatedAt"
                 }
               },
               "namespaceId": "public",
@@ -397,6 +656,80 @@
               "table": "purchase_details"
             }
           },
+          "TransferConfig": {
+            "fields": {
+              "gmailAddress": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "gmailAppPassword": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "llave": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "timeWindowMinutes": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "updatedAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamp-temporal@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "precision": 3
+                  }
+                }
+              }
+            },
+            "relations": {},
+            "storage": {
+              "fields": {
+                "gmailAddress": {
+                  "column": "gmailAddress"
+                },
+                "gmailAppPassword": {
+                  "column": "gmailAppPassword"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "llave": {
+                  "column": "llave"
+                },
+                "timeWindowMinutes": {
+                  "column": "timeWindowMinutes"
+                },
+                "updatedAt": {
+                  "column": "updatedAt"
+                }
+              },
+              "namespaceId": "public",
+              "table": "transfer_configs"
+            }
+          },
           "User": {
             "fields": {
               "active": {
@@ -528,6 +861,14 @@
               ],
               "typeName": "SaleUnit"
             },
+            "TransferStatus": {
+              "kind": "postgres-enum",
+              "members": [
+                "pending",
+                "validated"
+              ],
+              "typeName": "TransferStatus"
+            },
             "UserRole": {
               "kind": "postgres-enum",
               "members": [
@@ -538,6 +879,178 @@
             }
           },
           "table": {
+            "announced_transfers": {
+              "columns": {
+                "amount": {
+                  "codecId": "pg/float8@1",
+                  "nativeType": "float8",
+                  "nullable": false
+                },
+                "createdAt": {
+                  "codecId": "pg/timestamp-temporal@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamp",
+                  "nullable": false,
+                  "typeParams": {
+                    "precision": 3
+                  }
+                },
+                "id": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "expression": "autoincrement()",
+                    "kind": "function"
+                  },
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "messageId": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "payerName": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [],
+              "indexes": [
+                {
+                  "columns": [
+                    "messageId"
+                  ],
+                  "name": "announced_transfers_messageId_key",
+                  "unique": true
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ],
+                "name": "announced_transfers_pkey"
+              },
+              "uniques": []
+            },
+            "bank_transfers": {
+              "columns": {
+                "account": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "amount": {
+                  "codecId": "pg/float8@1",
+                  "nativeType": "float8",
+                  "nullable": false
+                },
+                "announcedAt": {
+                  "codecId": "pg/timestamp-temporal@1",
+                  "nativeType": "timestamp",
+                  "nullable": true,
+                  "typeParams": {
+                    "precision": 3
+                  }
+                },
+                "createdAt": {
+                  "codecId": "pg/timestamp-temporal@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamp",
+                  "nullable": false,
+                  "typeParams": {
+                    "precision": 3
+                  }
+                },
+                "id": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "expression": "autoincrement()",
+                    "kind": "function"
+                  },
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "llave": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "messageId": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "occurredAt": {
+                  "codecId": "pg/timestamp-temporal@1",
+                  "nativeType": "timestamp",
+                  "nullable": false,
+                  "typeParams": {
+                    "precision": 3
+                  }
+                },
+                "payerName": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "purchaseId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": true
+                }
+              },
+              "foreignKeys": [
+                {
+                  "name": "bank_transfers_purchaseId_fkey",
+                  "onDelete": "setNull",
+                  "onUpdate": "cascade",
+                  "source": {
+                    "columns": [
+                      "purchaseId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "bank_transfers"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "purchases"
+                  }
+                }
+              ],
+              "indexes": [
+                {
+                  "columns": [
+                    "messageId"
+                  ],
+                  "name": "bank_transfers_messageId_key",
+                  "unique": true
+                },
+                {
+                  "columns": [
+                    "purchaseId"
+                  ],
+                  "name": "bank_transfers_purchaseId_key",
+                  "unique": true
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ],
+                "name": "bank_transfers_pkey"
+              },
+              "uniques": []
+            },
             "products": {
               "columns": {
                 "createdAt": {
@@ -767,6 +1280,11 @@
                   "nativeType": "text",
                   "nullable": false
                 },
+                "payerName": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
                 "paymentType": {
                   "codecId": "pg/enum@1",
                   "nativeType": "PaymentType",
@@ -796,10 +1314,37 @@
                   "nativeType": "float8",
                   "nullable": false
                 },
+                "transferMessageId": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "transferStatus": {
+                  "codecId": "pg/enum@1",
+                  "nativeType": "TransferStatus",
+                  "nullable": true,
+                  "typeParams": {
+                    "typeName": "TransferStatus"
+                  },
+                  "valueSet": {
+                    "entityKind": "valueSet",
+                    "entityName": "TransferStatus",
+                    "namespaceId": "public",
+                    "plane": "storage"
+                  }
+                },
                 "updatedAt": {
                   "codecId": "pg/timestamp-temporal@1",
                   "nativeType": "timestamp",
                   "nullable": false,
+                  "typeParams": {
+                    "precision": 3
+                  }
+                },
+                "validatedAt": {
+                  "codecId": "pg/timestamp-temporal@1",
+                  "nativeType": "timestamp",
+                  "nullable": true,
                   "typeParams": {
                     "precision": 3
                   }
@@ -813,6 +1358,13 @@
                   ],
                   "name": "purchases_orderNumber_key",
                   "unique": true
+                },
+                {
+                  "columns": [
+                    "transferMessageId"
+                  ],
+                  "name": "purchases_transferMessageId_key",
+                  "unique": true
                 }
               ],
               "primaryKey": {
@@ -820,6 +1372,60 @@
                   "id"
                 ],
                 "name": "purchases_pkey"
+              },
+              "uniques": []
+            },
+            "transfer_configs": {
+              "columns": {
+                "gmailAddress": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "gmailAppPassword": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "id": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "expression": "autoincrement()",
+                    "kind": "function"
+                  },
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "llave": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "timeWindowMinutes": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": 60
+                  },
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "updatedAt": {
+                  "codecId": "pg/timestamp-temporal@1",
+                  "nativeType": "timestamp",
+                  "nullable": false,
+                  "typeParams": {
+                    "precision": 3
+                  }
+                }
+              },
+              "foreignKeys": [],
+              "indexes": [],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ],
+                "name": "transfer_configs_pkey"
               },
               "uniques": []
             },
@@ -933,6 +1539,13 @@
                 "ml"
               ]
             },
+            "TransferStatus": {
+              "kind": "valueSet",
+              "values": [
+                "pending",
+                "validated"
+              ]
+            },
             "UserRole": {
               "kind": "valueSet",
               "values": [
@@ -946,7 +1559,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "67e4171203f030ceaff536ace1fc183377222a3b42326ae28b754d3da735bb20"
+    "storageHash": "6bbed76b3cf3ca16e46af8c1f9c31951dfbf7937cff229750f08996927f0e95a"
   },
   "capabilities": {
     "postgres": {

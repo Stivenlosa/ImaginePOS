@@ -1,6 +1,7 @@
 "use client";
 
 import { AuthProvider } from "@/components/auth/auth-context";
+import { RegisterServiceWorker } from "@/components/pwa/register-sw";
 import { SidebarProvider } from "@/components/sidebar/sidebar-context";
 import { CartProvider } from "@/components/cartSummary/cart-context";
 import { LanguageProvider } from "@/i18n";
@@ -14,6 +15,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <AuthProvider>
         <SidebarProvider>
           <CartProvider>
+            <RegisterServiceWorker />
             <PaymentAnnouncer />
             {children}
           </CartProvider>

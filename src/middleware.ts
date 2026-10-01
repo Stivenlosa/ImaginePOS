@@ -23,7 +23,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(homeUrl);
   }
 
-  const needsAdmin = pathname === "/settings" || pathname.startsWith("/settings/") || pathname.startsWith("/api/users");
+  const needsAdmin =
+    pathname === "/settings" ||
+    pathname.startsWith("/settings/") ||
+    pathname.startsWith("/api/users") ||
+    pathname.startsWith("/api/settings");
   if (session && needsAdmin && session.role !== "administrador") {
     if (pathname.startsWith("/api/")) {
       return NextResponse.json({ error: "forbidden" }, { status: 403 });
@@ -37,5 +41,7 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|images|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)"],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|images|icons|sw\\.js|manifest\\.webmanifest|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+  ],
 };

@@ -47,7 +47,15 @@ export async function getInvoiceTableData() {
     .orderBy((purchase) => purchase.createdAt.desc())
     .all();
 
-  return purchases;
+  const transfers = await db.orm.public.BankTransfer.all();
+  const byPurchase = new Map(
+    transfers.filter((transfer) => transfer.purchaseId != null).map((transfer) => [transfer.purchaseId, transfer]),
+  );
+
+  return purchases.map((purchase) => ({
+    ...purchase,
+    bankTransfer: byPurchase.get(purchase.id) ?? null,
+  }));
 }
 
 export async function getTopChannels() {

@@ -27,6 +27,7 @@ type Purchase = {
   tax: number;
   total: number;
   paymentType: PaymentType;
+  transferStatus?: "pending" | "validated" | null;
   createdAt: string;
   updatedAt: string;
   details: PurchaseDetail[];
@@ -230,6 +231,29 @@ function DaySummaryModal({
                   <span className="text-green-600">${grandTotal.toFixed(2)}</span>
                 </div>
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="font-semibold text-gray-800 dark:text-white">{t("weeklyProfit.purchases")}</h3>
+              {purchases.length === 0 ? (
+                <p className="text-sm text-gray-500">{t("weeklyProfit.noPurchasesDay")}</p>
+              ) : (
+                purchases.map((purchase) => (
+                  <div key={purchase.id} className="flex items-center justify-between gap-3 text-sm">
+                    <span className="text-dark dark:text-white">
+                      #{purchase.orderNumber} · {t(`paymentTypes.${purchase.paymentType}`)}
+                    </span>
+                    <span className="flex items-center gap-2">
+                      {purchase.paymentType === "transfer" && (
+                        <span className={purchase.transferStatus === "validated" ? "text-[#219653]" : "text-[#F59E0B]"}>
+                          {t(purchase.transferStatus === "validated" ? "purchases.validated" : "purchases.pending")}
+                        </span>
+                      )}
+                      <span className="font-medium text-dark dark:text-white">${purchase.total.toFixed(2)}</span>
+                    </span>
+                  </div>
+                ))
+              )}
             </div>
 
             {/* Footer (for print) */}

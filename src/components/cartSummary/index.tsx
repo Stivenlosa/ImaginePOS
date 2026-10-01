@@ -290,10 +290,11 @@ interface ReceiptModalProps {
     total: number;
     orderNumber: string;
     paymentType: PaymentType;
+    transferStatus?: "pending" | "validated" | null;
     t: (key: string, params?: Record<string, string | number>) => string;
 }
 
-function ReceiptModal({ isOpen, onClose, onNewSale, items, subtotal, tax, total, orderNumber, paymentType, t }: ReceiptModalProps) {
+function ReceiptModal({ isOpen, onClose, onNewSale, items, subtotal, tax, total, orderNumber, paymentType, transferStatus, t }: ReceiptModalProps) {
     const receiptRef = useRef<HTMLDivElement>(null);
 
     const handlePrint = () => {
@@ -389,6 +390,12 @@ function ReceiptModal({ isOpen, onClose, onNewSale, items, subtotal, tax, total,
                             <p className="text-sm text-gray-600 dark:text-gray-400">
                                 <span className="font-medium">{t("checkout.paymentMethod")}:</span> {t(`paymentTypes.${paymentType}`)}
                             </p>
+                            {paymentType === "transfer" && (
+                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                    <span className="font-medium">{t("purchases.validation")}:</span>{" "}
+                                    {t(transferStatus === "validated" ? "purchases.validated" : "purchases.pending")}
+                                </p>
+                            )}
                         </div>
 
                         {/* Items */}
@@ -493,6 +500,7 @@ export default function CartSummary() {
         total: number;
         orderNumber: string;
         paymentType: PaymentType;
+        transferStatus?: "pending" | "validated" | null;
     } | null>(null);
 
     // Use manual input or scale weight
@@ -561,6 +569,8 @@ export default function CartSummary() {
                 throw new Error("Failed to save purchase");
             }
 
+            const saved = (await response.json()) as { transferStatus?: "pending" | "validated" | null };
+
             // Create the completed order snapshot
             setCompletedOrder({
                 items: [...cart],
@@ -569,6 +579,7 @@ export default function CartSummary() {
                 total,
                 orderNumber,
                 paymentType,
+                transferStatus: saved.transferStatus ?? (paymentType === "transfer" ? "pending" : null),
             });
 
             setShowPaymentModal(false);
@@ -819,6 +830,7 @@ export default function CartSummary() {
                     total={completedOrder.total}
                     orderNumber={completedOrder.orderNumber}
                     paymentType={completedOrder.paymentType}
+                    transferStatus={completedOrder.transferStatus}
                     t={t}
                 />
             )}

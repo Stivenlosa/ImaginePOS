@@ -34,7 +34,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'67e4171203f030ceaff536ace1fc183377222a3b42326ae28b754d3da735bb20'>;
+  StorageHashBase<'6bbed76b3cf3ca16e46af8c1f9c31951dfbf7937cff229750f08996927f0e95a'>;
 export type ExecutionHash = ExecutionHashBase<string>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
@@ -249,6 +249,25 @@ type DefaultLiteralValue<CodecId extends string, Encoded> = CodecId extends keyo
 
 export type FieldOutputTypes = {
   readonly public: {
+    readonly AnnouncedTransfer: {
+      readonly amount: CodecTypes['pg/float8@1']['output'];
+      readonly createdAt: CodecTypes['pg/timestamp-temporal@1']['output'];
+      readonly id: CodecTypes['pg/int4@1']['output'];
+      readonly messageId: CodecTypes['pg/text@1']['output'];
+      readonly payerName: CodecTypes['pg/text@1']['output'];
+    };
+    readonly BankTransfer: {
+      readonly account: CodecTypes['pg/text@1']['output'];
+      readonly amount: CodecTypes['pg/float8@1']['output'];
+      readonly announcedAt: CodecTypes['pg/timestamp-temporal@1']['output'] | null;
+      readonly createdAt: CodecTypes['pg/timestamp-temporal@1']['output'];
+      readonly id: CodecTypes['pg/int4@1']['output'];
+      readonly llave: CodecTypes['pg/text@1']['output'];
+      readonly messageId: CodecTypes['pg/text@1']['output'];
+      readonly occurredAt: CodecTypes['pg/timestamp-temporal@1']['output'];
+      readonly payerName: CodecTypes['pg/text@1']['output'];
+      readonly purchaseId: CodecTypes['pg/int4@1']['output'] | null;
+    };
     readonly Product: {
       readonly createdAt: CodecTypes['pg/timestamp-temporal@1']['output'];
       readonly id: CodecTypes['pg/int4@1']['output'];
@@ -262,11 +281,15 @@ export type FieldOutputTypes = {
       readonly createdAt: CodecTypes['pg/timestamp-temporal@1']['output'];
       readonly id: CodecTypes['pg/int4@1']['output'];
       readonly orderNumber: CodecTypes['pg/text@1']['output'];
+      readonly payerName: CodecTypes['pg/text@1']['output'] | null;
       readonly paymentType: 'cash' | 'card' | 'transfer';
       readonly subtotal: CodecTypes['pg/float8@1']['output'];
       readonly tax: CodecTypes['pg/float8@1']['output'];
       readonly total: CodecTypes['pg/float8@1']['output'];
+      readonly transferMessageId: CodecTypes['pg/text@1']['output'] | null;
+      readonly transferStatus: 'pending' | 'validated' | null;
       readonly updatedAt: CodecTypes['pg/timestamp-temporal@1']['output'];
+      readonly validatedAt: CodecTypes['pg/timestamp-temporal@1']['output'] | null;
     };
     readonly PurchaseDetail: {
       readonly createdAt: CodecTypes['pg/timestamp-temporal@1']['output'];
@@ -279,6 +302,14 @@ export type FieldOutputTypes = {
       readonly quantity: CodecTypes['pg/int4@1']['output'];
       readonly saleUnit: 'unit' | 'kg' | 'lb' | 'oz' | 'g' | 'liter' | 'ml';
       readonly weight: CodecTypes['pg/float8@1']['output'] | null;
+    };
+    readonly TransferConfig: {
+      readonly gmailAddress: CodecTypes['pg/text@1']['output'];
+      readonly gmailAppPassword: CodecTypes['pg/text@1']['output'];
+      readonly id: CodecTypes['pg/int4@1']['output'];
+      readonly llave: CodecTypes['pg/text@1']['output'];
+      readonly timeWindowMinutes: CodecTypes['pg/int4@1']['output'];
+      readonly updatedAt: CodecTypes['pg/timestamp-temporal@1']['output'];
     };
     readonly User: {
       readonly active: CodecTypes['pg/bool@1']['output'];
@@ -294,6 +325,25 @@ export type FieldOutputTypes = {
 };
 export type FieldInputTypes = {
   readonly public: {
+    readonly AnnouncedTransfer: {
+      readonly amount: CodecTypes['pg/float8@1']['input'];
+      readonly createdAt: CodecTypes['pg/timestamp-temporal@1']['input'];
+      readonly id: CodecTypes['pg/int4@1']['input'];
+      readonly messageId: CodecTypes['pg/text@1']['input'];
+      readonly payerName: CodecTypes['pg/text@1']['input'];
+    };
+    readonly BankTransfer: {
+      readonly account: CodecTypes['pg/text@1']['input'];
+      readonly amount: CodecTypes['pg/float8@1']['input'];
+      readonly announcedAt: CodecTypes['pg/timestamp-temporal@1']['input'] | null;
+      readonly createdAt: CodecTypes['pg/timestamp-temporal@1']['input'];
+      readonly id: CodecTypes['pg/int4@1']['input'];
+      readonly llave: CodecTypes['pg/text@1']['input'];
+      readonly messageId: CodecTypes['pg/text@1']['input'];
+      readonly occurredAt: CodecTypes['pg/timestamp-temporal@1']['input'];
+      readonly payerName: CodecTypes['pg/text@1']['input'];
+      readonly purchaseId: CodecTypes['pg/int4@1']['input'] | null;
+    };
     readonly Product: {
       readonly createdAt: CodecTypes['pg/timestamp-temporal@1']['input'];
       readonly id: CodecTypes['pg/int4@1']['input'];
@@ -307,11 +357,15 @@ export type FieldInputTypes = {
       readonly createdAt: CodecTypes['pg/timestamp-temporal@1']['input'];
       readonly id: CodecTypes['pg/int4@1']['input'];
       readonly orderNumber: CodecTypes['pg/text@1']['input'];
+      readonly payerName: CodecTypes['pg/text@1']['input'] | null;
       readonly paymentType: 'cash' | 'card' | 'transfer';
       readonly subtotal: CodecTypes['pg/float8@1']['input'];
       readonly tax: CodecTypes['pg/float8@1']['input'];
       readonly total: CodecTypes['pg/float8@1']['input'];
+      readonly transferMessageId: CodecTypes['pg/text@1']['input'] | null;
+      readonly transferStatus: 'pending' | 'validated' | null;
       readonly updatedAt: CodecTypes['pg/timestamp-temporal@1']['input'];
+      readonly validatedAt: CodecTypes['pg/timestamp-temporal@1']['input'] | null;
     };
     readonly PurchaseDetail: {
       readonly createdAt: CodecTypes['pg/timestamp-temporal@1']['input'];
@@ -324,6 +378,14 @@ export type FieldInputTypes = {
       readonly quantity: CodecTypes['pg/int4@1']['input'];
       readonly saleUnit: 'unit' | 'kg' | 'lb' | 'oz' | 'g' | 'liter' | 'ml';
       readonly weight: CodecTypes['pg/float8@1']['input'] | null;
+    };
+    readonly TransferConfig: {
+      readonly gmailAddress: CodecTypes['pg/text@1']['input'];
+      readonly gmailAppPassword: CodecTypes['pg/text@1']['input'];
+      readonly id: CodecTypes['pg/int4@1']['input'];
+      readonly llave: CodecTypes['pg/text@1']['input'];
+      readonly timeWindowMinutes: CodecTypes['pg/int4@1']['input'];
+      readonly updatedAt: CodecTypes['pg/timestamp-temporal@1']['input'];
     };
     readonly User: {
       readonly active: CodecTypes['pg/bool@1']['input'];
@@ -339,6 +401,25 @@ export type FieldInputTypes = {
 };
 export type StorageColumnTypes = {
   readonly public: {
+    readonly announced_transfers: {
+      readonly amount: CodecTypes['pg/float8@1']['output'];
+      readonly createdAt: CodecTypes['pg/timestamp-temporal@1']['output'];
+      readonly id: CodecTypes['pg/int4@1']['output'];
+      readonly messageId: CodecTypes['pg/text@1']['output'];
+      readonly payerName: CodecTypes['pg/text@1']['output'];
+    };
+    readonly bank_transfers: {
+      readonly account: CodecTypes['pg/text@1']['output'];
+      readonly amount: CodecTypes['pg/float8@1']['output'];
+      readonly announcedAt: CodecTypes['pg/timestamp-temporal@1']['output'] | null;
+      readonly createdAt: CodecTypes['pg/timestamp-temporal@1']['output'];
+      readonly id: CodecTypes['pg/int4@1']['output'];
+      readonly llave: CodecTypes['pg/text@1']['output'];
+      readonly messageId: CodecTypes['pg/text@1']['output'];
+      readonly occurredAt: CodecTypes['pg/timestamp-temporal@1']['output'];
+      readonly payerName: CodecTypes['pg/text@1']['output'];
+      readonly purchaseId: CodecTypes['pg/int4@1']['output'] | null;
+    };
     readonly products: {
       readonly createdAt: CodecTypes['pg/timestamp-temporal@1']['output'];
       readonly id: CodecTypes['pg/int4@1']['output'];
@@ -364,10 +445,22 @@ export type StorageColumnTypes = {
       readonly createdAt: CodecTypes['pg/timestamp-temporal@1']['output'];
       readonly id: CodecTypes['pg/int4@1']['output'];
       readonly orderNumber: CodecTypes['pg/text@1']['output'];
+      readonly payerName: CodecTypes['pg/text@1']['output'] | null;
       readonly paymentType: 'cash' | 'card' | 'transfer';
       readonly subtotal: CodecTypes['pg/float8@1']['output'];
       readonly tax: CodecTypes['pg/float8@1']['output'];
       readonly total: CodecTypes['pg/float8@1']['output'];
+      readonly transferMessageId: CodecTypes['pg/text@1']['output'] | null;
+      readonly transferStatus: 'pending' | 'validated' | null;
+      readonly updatedAt: CodecTypes['pg/timestamp-temporal@1']['output'];
+      readonly validatedAt: CodecTypes['pg/timestamp-temporal@1']['output'] | null;
+    };
+    readonly transfer_configs: {
+      readonly gmailAddress: CodecTypes['pg/text@1']['output'];
+      readonly gmailAppPassword: CodecTypes['pg/text@1']['output'];
+      readonly id: CodecTypes['pg/int4@1']['output'];
+      readonly llave: CodecTypes['pg/text@1']['output'];
+      readonly timeWindowMinutes: CodecTypes['pg/int4@1']['output'];
       readonly updatedAt: CodecTypes['pg/timestamp-temporal@1']['output'];
     };
     readonly users: {
@@ -384,6 +477,25 @@ export type StorageColumnTypes = {
 };
 export type StorageColumnInputTypes = {
   readonly public: {
+    readonly announced_transfers: {
+      readonly amount: CodecTypes['pg/float8@1']['input'];
+      readonly createdAt: CodecTypes['pg/timestamp-temporal@1']['input'];
+      readonly id: CodecTypes['pg/int4@1']['input'];
+      readonly messageId: CodecTypes['pg/text@1']['input'];
+      readonly payerName: CodecTypes['pg/text@1']['input'];
+    };
+    readonly bank_transfers: {
+      readonly account: CodecTypes['pg/text@1']['input'];
+      readonly amount: CodecTypes['pg/float8@1']['input'];
+      readonly announcedAt: CodecTypes['pg/timestamp-temporal@1']['input'] | null;
+      readonly createdAt: CodecTypes['pg/timestamp-temporal@1']['input'];
+      readonly id: CodecTypes['pg/int4@1']['input'];
+      readonly llave: CodecTypes['pg/text@1']['input'];
+      readonly messageId: CodecTypes['pg/text@1']['input'];
+      readonly occurredAt: CodecTypes['pg/timestamp-temporal@1']['input'];
+      readonly payerName: CodecTypes['pg/text@1']['input'];
+      readonly purchaseId: CodecTypes['pg/int4@1']['input'] | null;
+    };
     readonly products: {
       readonly createdAt: CodecTypes['pg/timestamp-temporal@1']['input'];
       readonly id: CodecTypes['pg/int4@1']['input'];
@@ -409,10 +521,22 @@ export type StorageColumnInputTypes = {
       readonly createdAt: CodecTypes['pg/timestamp-temporal@1']['input'];
       readonly id: CodecTypes['pg/int4@1']['input'];
       readonly orderNumber: CodecTypes['pg/text@1']['input'];
+      readonly payerName: CodecTypes['pg/text@1']['input'] | null;
       readonly paymentType: 'cash' | 'card' | 'transfer';
       readonly subtotal: CodecTypes['pg/float8@1']['input'];
       readonly tax: CodecTypes['pg/float8@1']['input'];
       readonly total: CodecTypes['pg/float8@1']['input'];
+      readonly transferMessageId: CodecTypes['pg/text@1']['input'] | null;
+      readonly transferStatus: 'pending' | 'validated' | null;
+      readonly updatedAt: CodecTypes['pg/timestamp-temporal@1']['input'];
+      readonly validatedAt: CodecTypes['pg/timestamp-temporal@1']['input'] | null;
+    };
+    readonly transfer_configs: {
+      readonly gmailAddress: CodecTypes['pg/text@1']['input'];
+      readonly gmailAppPassword: CodecTypes['pg/text@1']['input'];
+      readonly id: CodecTypes['pg/int4@1']['input'];
+      readonly llave: CodecTypes['pg/text@1']['input'];
+      readonly timeWindowMinutes: CodecTypes['pg/int4@1']['input'];
       readonly updatedAt: CodecTypes['pg/timestamp-temporal@1']['input'];
     };
     readonly users: {
@@ -429,6 +553,28 @@ export type StorageColumnInputTypes = {
 };
 
 export namespace Models {
+  export type public_AnnouncedTransfer = {
+    amount: CodecTypes['pg/float8@1']['output'];
+    createdAt: CodecTypes['pg/timestamp-temporal@1']['output'];
+    id: CodecTypes['pg/int4@1']['output'];
+    messageId: CodecTypes['pg/text@1']['output'];
+    payerName: CodecTypes['pg/text@1']['output'];
+    readonly [RelationKeys]?: never;
+  };
+  export type public_BankTransfer = {
+    account: CodecTypes['pg/text@1']['output'];
+    amount: CodecTypes['pg/float8@1']['output'];
+    announcedAt: CodecTypes['pg/timestamp-temporal@1']['output'] | null;
+    createdAt: CodecTypes['pg/timestamp-temporal@1']['output'];
+    id: CodecTypes['pg/int4@1']['output'];
+    llave: CodecTypes['pg/text@1']['output'];
+    messageId: CodecTypes['pg/text@1']['output'];
+    occurredAt: CodecTypes['pg/timestamp-temporal@1']['output'];
+    payerName: CodecTypes['pg/text@1']['output'];
+    purchaseId: CodecTypes['pg/int4@1']['output'] | null;
+    purchase: public_Purchase | null;
+    readonly [RelationKeys]?: 'purchase';
+  };
   export type public_Product = {
     createdAt: CodecTypes['pg/timestamp-temporal@1']['output'];
     id: CodecTypes['pg/int4@1']['output'];
@@ -444,11 +590,15 @@ export namespace Models {
     createdAt: CodecTypes['pg/timestamp-temporal@1']['output'];
     id: CodecTypes['pg/int4@1']['output'];
     orderNumber: CodecTypes['pg/text@1']['output'];
+    payerName: CodecTypes['pg/text@1']['output'] | null;
     paymentType: 'cash' | 'card' | 'transfer';
     subtotal: CodecTypes['pg/float8@1']['output'];
     tax: CodecTypes['pg/float8@1']['output'];
     total: CodecTypes['pg/float8@1']['output'];
+    transferMessageId: CodecTypes['pg/text@1']['output'] | null;
+    transferStatus: 'pending' | 'validated' | null;
     updatedAt: CodecTypes['pg/timestamp-temporal@1']['output'];
+    validatedAt: CodecTypes['pg/timestamp-temporal@1']['output'] | null;
     details: public_PurchaseDetail[];
     readonly [RelationKeys]?: 'details';
   };
@@ -467,6 +617,15 @@ export namespace Models {
     purchase: public_Purchase;
     readonly [RelationKeys]?: 'product' | 'purchase';
   };
+  export type public_TransferConfig = {
+    gmailAddress: CodecTypes['pg/text@1']['output'];
+    gmailAppPassword: CodecTypes['pg/text@1']['output'];
+    id: CodecTypes['pg/int4@1']['output'];
+    llave: CodecTypes['pg/text@1']['output'];
+    timeWindowMinutes: CodecTypes['pg/int4@1']['output'];
+    updatedAt: CodecTypes['pg/timestamp-temporal@1']['output'];
+    readonly [RelationKeys]?: never;
+  };
   export type public_User = {
     active: CodecTypes['pg/bool@1']['output'];
     createdAt: CodecTypes['pg/timestamp-temporal@1']['output'];
@@ -482,9 +641,12 @@ export namespace Models {
 
 export declare const models: {
   public: {
+    AnnouncedTransfer: Models.public_AnnouncedTransfer;
+    BankTransfer: Models.public_BankTransfer;
     Product: Models.public_Product;
     Purchase: Models.public_Purchase;
     PurchaseDetail: Models.public_PurchaseDetail;
+    TransferConfig: Models.public_TransferConfig;
     User: Models.public_User;
   };
 };
@@ -507,6 +669,148 @@ type ContractBase = Omit<
         readonly kind: 'postgres-schema';
         readonly entries: {
           readonly table: {
+            readonly announced_transfers: {
+              columns: {
+                readonly amount: {
+                  readonly nativeType: 'float8';
+                  readonly codecId: 'pg/float8@1';
+                  readonly nullable: false;
+                };
+                readonly createdAt: {
+                  readonly nativeType: 'timestamp';
+                  readonly codecId: 'pg/timestamp-temporal@1';
+                  readonly nullable: false;
+                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
+                  readonly typeParams: { readonly precision: 3 };
+                };
+                readonly id: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'function';
+                    readonly expression: 'autoincrement()';
+                  };
+                };
+                readonly messageId: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                };
+                readonly payerName: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                };
+              };
+              primaryKey: {
+                readonly columns: readonly ['id'];
+                readonly name: 'announced_transfers_pkey';
+              };
+              uniques: readonly [];
+              indexes: readonly [
+                {
+                  readonly name: 'announced_transfers_messageId_key';
+                  readonly columns: readonly ['messageId'];
+                  readonly unique: true;
+                },
+              ];
+              foreignKeys: readonly [];
+            };
+            readonly bank_transfers: {
+              columns: {
+                readonly account: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                };
+                readonly amount: {
+                  readonly nativeType: 'float8';
+                  readonly codecId: 'pg/float8@1';
+                  readonly nullable: false;
+                };
+                readonly announcedAt: {
+                  readonly nativeType: 'timestamp';
+                  readonly codecId: 'pg/timestamp-temporal@1';
+                  readonly nullable: true;
+                  readonly typeParams: { readonly precision: 3 };
+                };
+                readonly createdAt: {
+                  readonly nativeType: 'timestamp';
+                  readonly codecId: 'pg/timestamp-temporal@1';
+                  readonly nullable: false;
+                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
+                  readonly typeParams: { readonly precision: 3 };
+                };
+                readonly id: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'function';
+                    readonly expression: 'autoincrement()';
+                  };
+                };
+                readonly llave: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                };
+                readonly messageId: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                };
+                readonly occurredAt: {
+                  readonly nativeType: 'timestamp';
+                  readonly codecId: 'pg/timestamp-temporal@1';
+                  readonly nullable: false;
+                  readonly typeParams: { readonly precision: 3 };
+                };
+                readonly payerName: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                };
+                readonly purchaseId: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: true;
+                };
+              };
+              primaryKey: {
+                readonly columns: readonly ['id'];
+                readonly name: 'bank_transfers_pkey';
+              };
+              uniques: readonly [];
+              indexes: readonly [
+                {
+                  readonly name: 'bank_transfers_messageId_key';
+                  readonly columns: readonly ['messageId'];
+                  readonly unique: true;
+                },
+                {
+                  readonly name: 'bank_transfers_purchaseId_key';
+                  readonly columns: readonly ['purchaseId'];
+                  readonly unique: true;
+                },
+              ];
+              foreignKeys: readonly [
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'bank_transfers';
+                    readonly columns: readonly ['purchaseId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'purchases';
+                    readonly columns: readonly ['id'];
+                  };
+                  readonly name: 'bank_transfers_purchaseId_fkey';
+                },
+              ];
+            };
             readonly products: {
               columns: {
                 readonly createdAt: {
@@ -684,6 +988,11 @@ type ContractBase = Omit<
                   readonly codecId: 'pg/text@1';
                   readonly nullable: false;
                 };
+                readonly payerName: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                };
                 readonly paymentType: {
                   readonly nativeType: 'PaymentType';
                   readonly codecId: 'pg/enum@1';
@@ -705,10 +1014,27 @@ type ContractBase = Omit<
                   readonly codecId: 'pg/float8@1';
                   readonly nullable: false;
                 };
+                readonly transferMessageId: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                };
+                readonly transferStatus: {
+                  readonly nativeType: 'TransferStatus';
+                  readonly codecId: 'pg/enum@1';
+                  readonly nullable: true;
+                  readonly typeParams: { readonly typeName: 'TransferStatus' };
+                };
                 readonly updatedAt: {
                   readonly nativeType: 'timestamp';
                   readonly codecId: 'pg/timestamp-temporal@1';
                   readonly nullable: false;
+                  readonly typeParams: { readonly precision: 3 };
+                };
+                readonly validatedAt: {
+                  readonly nativeType: 'timestamp';
+                  readonly codecId: 'pg/timestamp-temporal@1';
+                  readonly nullable: true;
                   readonly typeParams: { readonly precision: 3 };
                 };
               };
@@ -720,7 +1046,62 @@ type ContractBase = Omit<
                   readonly columns: readonly ['orderNumber'];
                   readonly unique: true;
                 },
+                {
+                  readonly name: 'purchases_transferMessageId_key';
+                  readonly columns: readonly ['transferMessageId'];
+                  readonly unique: true;
+                },
               ];
+              foreignKeys: readonly [];
+            };
+            readonly transfer_configs: {
+              columns: {
+                readonly gmailAddress: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                };
+                readonly gmailAppPassword: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                };
+                readonly id: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'function';
+                    readonly expression: 'autoincrement()';
+                  };
+                };
+                readonly llave: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                };
+                readonly timeWindowMinutes: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/int4@1', 60>;
+                  };
+                };
+                readonly updatedAt: {
+                  readonly nativeType: 'timestamp';
+                  readonly codecId: 'pg/timestamp-temporal@1';
+                  readonly nullable: false;
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+              primaryKey: {
+                readonly columns: readonly ['id'];
+                readonly name: 'transfer_configs_pkey';
+              };
+              uniques: readonly [];
+              indexes: readonly [];
               foreignKeys: readonly [];
             };
             readonly users: {
@@ -799,6 +1180,10 @@ type ContractBase = Omit<
               readonly kind: 'valueSet';
               readonly values: readonly ['unit', 'kg', 'lb', 'oz', 'g', 'liter', 'ml'];
             };
+            readonly TransferStatus: {
+              readonly kind: 'valueSet';
+              readonly values: readonly ['pending', 'validated'];
+            };
             readonly UserRole: {
               readonly kind: 'valueSet';
               readonly values: readonly ['administrador', 'cajero'];
@@ -814,18 +1199,156 @@ type ContractBase = Omit<
   readonly target: 'postgres';
   readonly targetFamily: 'sql';
   readonly roots: {
+    readonly announced_transfers: {
+      readonly namespace: 'public' & NamespaceId;
+      readonly model: 'AnnouncedTransfer';
+    };
+    readonly bank_transfers: {
+      readonly namespace: 'public' & NamespaceId;
+      readonly model: 'BankTransfer';
+    };
     readonly products: { readonly namespace: 'public' & NamespaceId; readonly model: 'Product' };
     readonly purchase_details: {
       readonly namespace: 'public' & NamespaceId;
       readonly model: 'PurchaseDetail';
     };
     readonly purchases: { readonly namespace: 'public' & NamespaceId; readonly model: 'Purchase' };
+    readonly transfer_configs: {
+      readonly namespace: 'public' & NamespaceId;
+      readonly model: 'TransferConfig';
+    };
     readonly users: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
   };
   readonly domain: {
     readonly namespaces: {
       readonly public: {
         readonly models: {
+          readonly AnnouncedTransfer: {
+            readonly fields: {
+              readonly amount: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/float8@1' };
+              };
+              readonly createdAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamp-temporal@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+              readonly id: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly messageId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly payerName: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+            };
+            readonly relations: Record<string, never>;
+            readonly storage: {
+              readonly table: 'announced_transfers';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly amount: { readonly column: 'amount' };
+                readonly createdAt: { readonly column: 'createdAt' };
+                readonly id: { readonly column: 'id' };
+                readonly messageId: { readonly column: 'messageId' };
+                readonly payerName: { readonly column: 'payerName' };
+              };
+            };
+          };
+          readonly BankTransfer: {
+            readonly fields: {
+              readonly account: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly amount: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/float8@1' };
+              };
+              readonly announcedAt: {
+                readonly nullable: true;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamp-temporal@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+              readonly createdAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamp-temporal@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+              readonly id: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly llave: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly messageId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly occurredAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamp-temporal@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+              readonly payerName: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly purchaseId: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+            };
+            readonly relations: {
+              readonly purchase: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Purchase';
+                };
+                readonly cardinality: 'N:1';
+                readonly nullable: true;
+                readonly on: {
+                  readonly localFields: readonly ['purchaseId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+            };
+            readonly storage: {
+              readonly table: 'bank_transfers';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly account: { readonly column: 'account' };
+                readonly amount: { readonly column: 'amount' };
+                readonly announcedAt: { readonly column: 'announcedAt' };
+                readonly createdAt: { readonly column: 'createdAt' };
+                readonly id: { readonly column: 'id' };
+                readonly llave: { readonly column: 'llave' };
+                readonly messageId: { readonly column: 'messageId' };
+                readonly occurredAt: { readonly column: 'occurredAt' };
+                readonly payerName: { readonly column: 'payerName' };
+                readonly purchaseId: { readonly column: 'purchaseId' };
+              };
+            };
+          };
           readonly Product: {
             readonly fields: {
               readonly createdAt: {
@@ -914,6 +1437,10 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
+              readonly payerName: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
               readonly paymentType: {
                 readonly nullable: false;
                 readonly type: {
@@ -934,8 +1461,28 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/float8@1' };
               };
+              readonly transferMessageId: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly transferStatus: {
+                readonly nullable: true;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/enum@1';
+                  readonly typeParams: { readonly typeName: 'TransferStatus' };
+                };
+              };
               readonly updatedAt: {
                 readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamp-temporal@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+              readonly validatedAt: {
+                readonly nullable: true;
                 readonly type: {
                   readonly kind: 'scalar';
                   readonly codecId: 'pg/timestamp-temporal@1';
@@ -963,11 +1510,15 @@ type ContractBase = Omit<
                 readonly createdAt: { readonly column: 'createdAt' };
                 readonly id: { readonly column: 'id' };
                 readonly orderNumber: { readonly column: 'orderNumber' };
+                readonly payerName: { readonly column: 'payerName' };
                 readonly paymentType: { readonly column: 'paymentType' };
                 readonly subtotal: { readonly column: 'subtotal' };
                 readonly tax: { readonly column: 'tax' };
                 readonly total: { readonly column: 'total' };
+                readonly transferMessageId: { readonly column: 'transferMessageId' };
+                readonly transferStatus: { readonly column: 'transferStatus' };
                 readonly updatedAt: { readonly column: 'updatedAt' };
+                readonly validatedAt: { readonly column: 'validatedAt' };
               };
             };
           };
@@ -1062,6 +1613,51 @@ type ContractBase = Omit<
                 readonly quantity: { readonly column: 'quantity' };
                 readonly saleUnit: { readonly column: 'saleUnit' };
                 readonly weight: { readonly column: 'weight' };
+              };
+            };
+          };
+          readonly TransferConfig: {
+            readonly fields: {
+              readonly gmailAddress: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly gmailAppPassword: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly id: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly llave: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly timeWindowMinutes: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly updatedAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamp-temporal@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+            };
+            readonly relations: Record<string, never>;
+            readonly storage: {
+              readonly table: 'transfer_configs';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly gmailAddress: { readonly column: 'gmailAddress' };
+                readonly gmailAppPassword: { readonly column: 'gmailAppPassword' };
+                readonly id: { readonly column: 'id' };
+                readonly llave: { readonly column: 'llave' };
+                readonly timeWindowMinutes: { readonly column: 'timeWindowMinutes' };
+                readonly updatedAt: { readonly column: 'updatedAt' };
               };
             };
           };

@@ -70,6 +70,23 @@
             "last_admin": "El sistema necesita al menos un Administrador activo",
             "self_delete": "No puedes eliminar tu propia cuenta",
             "self_deactivate": "No puedes desactivar tu propia cuenta"
+        },
+        "transfer": {
+            "title": "Correo de transferencias",
+            "subtitle": "ImaginePOS lee este Gmail y confirma la venta cuando el banco avisa un pago con la misma llave.",
+            "email": "Correo de Google",
+            "password": "Contraseña de aplicación",
+            "passwordHint": "Déjala en blanco para conservar la actual",
+            "llave": "Llave",
+            "window": "Minutos de diferencia permitidos",
+            "help": "Google rechaza la contraseña normal de la cuenta. Crea una contraseña de aplicación de 16 letras en Cuenta de Google, Seguridad, Verificación en 2 pasos, Contraseñas de aplicaciones, y activa IMAP en Gmail. En Ventas se anuncia cada correo con la forma «recibiste una transferencia de JORDAN LOPEZ por $200.00 … llave @jordan751 el 30/09/26 a las 22:54».",
+            "saved": "Configuración guardada",
+            "errors": {
+                "invalid_email": "Escribe un correo de Google válido",
+                "invalid_llave": "La llave es obligatoria",
+                "invalid_window": "El rango debe estar entre 5 y 240 minutos",
+                "invalid_password": "Usa la contraseña de aplicación de 16 caracteres, no la contraseña normal"
+            }
         }
     },
     "cart": {
@@ -108,6 +125,25 @@
         "paymentMethod": "Método de Pago",
         "processing": "Procesando..."
     },
+    "sales": {
+        "inboxRejected": "Gmail rechazó la contraseña. En Configuración guarda la contraseña de aplicación de 16 caracteres: Cuenta de Google, Seguridad, Contraseñas de aplicaciones.",
+        "inboxUnreachable": "No se pudo conectar con Gmail. Ventas seguirá intentando."
+    },
+    "transfers": {
+        "title": "Transferencias del banco",
+        "recent": "Últimas transferencias del correo",
+        "empty": "Todavía no hay correos de transferencia",
+        "when": "Hora del banco",
+        "payer": "Quien pagó",
+        "amount": "Valor",
+        "account": "Cuenta",
+        "llave": "Llave",
+        "purchase": "Compra",
+        "view": "Ver transferencia",
+        "purchaseTitle": "Transferencia de esta compra",
+        "validatedAt": "Validada el",
+        "notMatched": "Todavía ningún correo del banco coincide con esta compra."
+    },
     "purchases": {
         "order": "Orden",
         "date": "Fecha",
@@ -119,7 +155,20 @@
         "noPurchases": "No hay compras aún",
         "item": "artículo",
         "items": "artículos",
-        "orderNumber": "Orden #{{number}}"
+        "orderNumber": "Orden #{{number}}",
+        "title": "Compras",
+        "validation": "Validación",
+        "pending": "Pendiente",
+        "validated": "Validada",
+        "markValidated": "Marcar validada",
+        "markPending": "Marcar pendiente",
+        "checkEmails": "Revisar correo",
+        "checking": "Revisando...",
+        "checkResult": "Se validaron {{count}} transferencias",
+        "checkFailed": "No se pudo leer el correo. Revisa la contraseña de aplicación.",
+        "invalidCredentials": "Gmail rechazó la contraseña. Guarda la contraseña de aplicación de 16 caracteres en Configuración.",
+        "notConfigured": "Configura el correo de transferencias antes de revisar.",
+        "statusFailed": "No se pudo cambiar el estado"
     },
     "weeklyProfit": {
         "title": "Ventas Semanales",

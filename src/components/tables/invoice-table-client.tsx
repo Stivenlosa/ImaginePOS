@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/components/auth/auth-context";
 import {
   Table,
   TableBody,
@@ -29,6 +31,8 @@ type PurchaseDetail = {
   createdAt: string;
 };
 
+type TransferStatus = "pending" | "validated";
+
 type Purchase = {
   id: number;
   orderNumber: string;
@@ -36,6 +40,16 @@ type Purchase = {
   tax: number;
   total: number;
   paymentType: PaymentType;
+  transferStatus: TransferStatus | null;
+  payerName: string | null;
+  validatedAt: string | null;
+  bankTransfer: {
+    payerName: string;
+    amount: number;
+    account: string;
+    llave: string;
+    occurredAt: string;
+  } | null;
   createdAt: string;
   updatedAt: string;
   details: PurchaseDetail[];
@@ -91,6 +105,12 @@ function PurchaseDetailModal({
   t: (key: string, params?: Record<string, string | number>) => string;
 }) {
   const receiptRef = useRef<HTMLDivElement>(null);
+  const [showTransfer, setShowTransfer] = useState(false);
+  const status = purchase.paymentType === "transfer"
+    ? purchase.transferStatus === "validated"
+      ? "validated"
+      : "pending"
+    : null;
 
   const handlePrint = () => {
     const printContent = receiptRef.current;
@@ -202,6 +222,17 @@ function PurchaseDetailModal({
                 <span className="font-medium">{t("checkout.date")}:</span>{" "}
                 {dayjs(purchase.createdAt).format("MMM DD, YYYY - hh:mm A")}
               </p>
+              {purchase.paymentType === "transfer" && (
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <span className="font-medium">{t("purchases.validation")}:</span>{" "}
+                  {t(
+                    purchase.transferStatus === "validated"
+                      ? "purchases.validated"
+                      : "purchases.pending",
+                  )}
+                  {purchase.payerName ? ` · ${purchase.payerName}` : ""}
+                </p>
+              )}
               <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2">
                 <span className="font-medium">
                   {t("checkout.paymentMethod")}:
@@ -275,6 +306,14 @@ function PurchaseDetailModal({
 
         {/* Actions */}
         <div className="p-5 border-t dark:border-dark-4 bg-gray-50 dark:bg-dark-2 flex gap-3">
+          {purchase.paymentType === "transfer" && (
+            <button
+              onClick={() => setShowTransfer(true)}
+              className="flex-1 py-3 bg-amber-500 text-white rounded-xl hover:bg-amber-400 transition"
+            >
+              {t("transfers.view")}
+            </button>
+          )}
           <button
             onClick={handlePrint}
             className="flex-1 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-500 transition flex items-center justify-center gap-2"
@@ -290,15 +329,152 @@ function PurchaseDetailModal({
           </button>
         </div>
       </div>
+      {showTransfer && status && (
+        <TransferInfoModal
+          purchase={purchase}
+          status={status}
+          onClose={() => setShowTransfer(false)}
+          t={t}
+        />
+      )}
     </div>
   );
+}
+
+function TransferInfoModal({
+  purchase,
+  status,
+  onClose,
+  t,
+}: {
+  purchase: Purchase;
+  status: "pending" | "validated";
+  onClose: () => void;
+  t: (key: string, params?: Record<string, string | number>) => string;
+}) {
+  const transfer = purchase.bankTransfer;
+  const rows = [
+    [t("purchases.order"), `#${purchase.orderNumber}`],
+    [t("purchases.validation"), t(status === "validated" ? "purchases.validated" : "purchases.pending")],
+    [t("transfers.payer"), transfer?.payerName ?? purchase.payerName ?? "—"],
+    [t("transfers.amount"), transfer ? `$${transfer.amount.toFixed(2)}` : `$${purchase.total.toFixed(2)}`],
+    [t("transfers.account"), transfer ? `*${transfer.account}` : "—"],
+    [t("transfers.llave"), transfer?.llave ?? "—"],
+    [
+      t("transfers.when"),
+      transfer ? dayjs(transfer.occurredAt).format("MMM DD, YYYY hh:mm A") : "—",
+    ],
+    [
+      t("transfers.validatedAt"),
+      purchase.validatedAt ? dayjs(purchase.validatedAt).format("MMM DD, YYYY hh:mm A") : "—",
+    ],
+  ];
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4">
+      <div className="w-full max-w-md rounded-2xl bg-white p-6 dark:bg-gray-dark">
+        <h2 className="text-lg font-bold text-dark dark:text-white">{t("transfers.purchaseTitle")}</h2>
+        <dl className="mt-4 space-y-3">
+          {rows.map(([label, value]) => (
+            <div key={label} className="flex items-start justify-between gap-4 text-sm">
+              <dt className="text-gray-500">{label}</dt>
+              <dd className="text-right font-medium text-dark dark:text-white">{value}</dd>
+            </div>
+          ))}
+        </dl>
+        {!transfer && (
+          <p className="mt-4 text-sm text-gray-500">{t("transfers.notMatched")}</p>
+        )}
+        <button
+          onClick={onClose}
+          className="mt-5 w-full rounded-xl bg-gray-200 py-3 text-gray-700 dark:bg-dark-3 dark:text-dark-6"
+        >
+          {t("common.close")}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function transferLabel(purchase: Purchase) {
+  if (purchase.paymentType !== "transfer") return null;
+  return purchase.transferStatus === "validated" ? "validated" : "pending";
 }
 
 export function InvoiceTableClient({ purchases }: InvoiceTableClientProps) {
   const [selectedPurchase, setSelectedPurchase] = useState<Purchase | null>(
     null
   );
+  const [rows, setRows] = useState(purchases);
+  const [checking, setChecking] = useState(false);
+  const [updatingId, setUpdatingId] = useState<number | null>(null);
+  const [notice, setNotice] = useState("");
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const router = useRouter();
+  const isAdmin = user?.role === "administrador";
+
+  useEffect(() => {
+    setRows(purchases);
+  }, [purchases]);
+
+  async function checkEmails() {
+    setChecking(true);
+    setNotice("");
+    const response = await fetch("/api/transfers/validate", { method: "POST" });
+    const data = (await response.json().catch(() => null)) as
+      | { configured?: boolean; updated?: number; error?: string }
+      | null;
+    setChecking(false);
+
+    if (data?.error === "invalid_credentials") {
+      setNotice(t("purchases.invalidCredentials"));
+      return;
+    }
+    if (!response.ok || data?.error) {
+      setNotice(t("purchases.checkFailed"));
+      return;
+    }
+    if (data?.configured === false) {
+      setNotice(t("purchases.notConfigured"));
+      return;
+    }
+    setNotice(t("purchases.checkResult", { count: data?.updated ?? 0 }));
+    router.refresh();
+  }
+
+  async function setTransferStatus(purchase: Purchase, transferStatus: TransferStatus) {
+    setUpdatingId(purchase.id);
+    setNotice("");
+    const response = await fetch(`/api/purchases/${purchase.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ transferStatus }),
+    });
+    setUpdatingId(null);
+    if (!response.ok) {
+      setNotice(t("purchases.statusFailed"));
+      return;
+    }
+    const data = (await response.json()) as {
+      transferStatus: TransferStatus | null;
+      payerName: string | null;
+      validatedAt: string | null;
+    };
+    setRows((current) =>
+      current.map((row) =>
+        row.id === purchase.id
+          ? {
+              ...row,
+              transferStatus: data.transferStatus,
+              payerName: data.payerName,
+              validatedAt: data.validatedAt,
+            }
+          : row,
+      ),
+    );
+    router.refresh();
+  }
 
   const handlePrintDirect = (purchase: Purchase) => {
     const styles = `
@@ -404,6 +580,22 @@ export function InvoiceTableClient({ purchases }: InvoiceTableClientProps) {
 
   return (
     <>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="text-lg font-semibold text-dark dark:text-white">
+            {t("purchases.title")}
+          </h2>
+          {notice && <p className="mt-1 text-sm text-gray-6">{notice}</p>}
+        </div>
+        <button
+          type="button"
+          onClick={() => void checkEmails()}
+          disabled={checking}
+          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90 disabled:opacity-60"
+        >
+          {checking ? t("purchases.checking") : t("purchases.checkEmails")}
+        </button>
+      </div>
       <Table>
         <TableHeader>
           <TableRow className="border-none bg-[#F7F9FC] dark:bg-dark-2 [&>th]:py-4 [&>th]:text-base [&>th]:text-dark [&>th]:dark:text-white">
@@ -414,6 +606,7 @@ export function InvoiceTableClient({ purchases }: InvoiceTableClientProps) {
               {t("purchases.date")}
             </TableHead>
             <TableHead>{t("purchases.paymentType")}</TableHead>
+            <TableHead>{t("purchases.validation")}</TableHead>
             <TableHead className="text-right">
               {t("purchases.total")}
             </TableHead>
@@ -427,14 +620,14 @@ export function InvoiceTableClient({ purchases }: InvoiceTableClientProps) {
           {purchases.length === 0 ? (
             <TableRow>
               <TableCell
-                colSpan={5}
+                colSpan={6}
                 className="text-center py-10 text-gray-400 dark:text-dark-5"
               >
                 {t("purchases.noPurchases")}
               </TableCell>
             </TableRow>
           ) : (
-            purchases.map((purchase) => {
+            rows.map((purchase) => {
               const paymentStyle =
                 PAYMENT_TYPE_STYLES[purchase.paymentType];
               return (
@@ -473,6 +666,51 @@ export function InvoiceTableClient({ purchases }: InvoiceTableClientProps) {
                     >
                       {t(paymentStyle.label)}
                     </div>
+                  </TableCell>
+
+                  <TableCell>
+                    {transferLabel(purchase) ? (
+                      <div className="flex flex-col items-start gap-1">
+                        <span
+                          className={cn(
+                            "max-w-fit rounded-full px-3 py-1 text-xs font-medium",
+                            transferLabel(purchase) === "validated"
+                              ? "bg-[#219653]/[0.08] text-[#219653]"
+                              : "bg-[#F59E0B]/[0.08] text-[#F59E0B]",
+                          )}
+                        >
+                          {t(
+                            transferLabel(purchase) === "validated"
+                              ? "purchases.validated"
+                              : "purchases.pending",
+                          )}
+                        </span>
+                        {purchase.payerName && (
+                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                            {purchase.payerName}
+                          </span>
+                        )}
+                        {isAdmin && (
+                          <button
+                            type="button"
+                            disabled={updatingId === purchase.id}
+                            onClick={() =>
+                              void setTransferStatus(
+                                purchase,
+                                transferLabel(purchase) === "validated" ? "pending" : "validated",
+                              )
+                            }
+                            className="text-xs text-primary hover:underline disabled:opacity-60"
+                          >
+                            {transferLabel(purchase) === "validated"
+                              ? t("purchases.markPending")
+                              : t("purchases.markValidated")}
+                          </button>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-gray-400">—</span>
+                    )}
                   </TableCell>
 
                   <TableCell className="text-right">
